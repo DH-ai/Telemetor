@@ -1,6 +1,6 @@
 ## Working on the project
 
-### Timleline
+### Checklist
 
  
 -[x] 2024-09-22: Started the project
