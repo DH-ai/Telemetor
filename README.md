@@ -3,9 +3,9 @@
 ### Checklist
 
  
--[x] 2024-09-22: Started the project
+- [x] 2024-09-22: Started the project
 - [x] Learning Dart
-- [x] Learning about flutter and related technologies
+- [x] Learning about flutter and related tegit chnologies
 - [ ] Design the app
 - [ ] Implement the app
 - [ ] Working on the backend to get data for prerpocessing
