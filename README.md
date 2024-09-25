@@ -4,8 +4,8 @@
 
  
 -[x] 2024-09-22: Started the project
-- [ ] Learning Dart
-- [ ] Learning about flutter and related technologies
+- [x] Learning Dart
+- [x] Learning about flutter and related technologies
 - [ ] Design the app
 - [ ] Implement the app
 - [ ] Working on the backend to get data for prerpocessing
