@@ -37,7 +37,7 @@ class MyHomePage extends StatelessWidget{
   Widget build(BuildContext context){
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-      color:Theme.of(context).primaryColor ,git stuatuts
+      color:Theme.of(context).primaryColor;
 
       child: Scaffold(
         appBar: AppBar(
