@@ -1,46 +1,85 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
 
-class MyApp extends StatelessWidget {
+void main (){
+  runApp(const MyApp());
+}
+
+//
+
+class MyApp extends StatelessWidget{
+
+
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp( // Root widget
-      home: Scaffold(
+    return MaterialApp(
+      title: 'Telemetor',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+     ),
+      home: const MyHomePage(title: 'Telemetor'),
+    );
+  }
+}
+
+
+class MyHomePage extends StatelessWidget{
+  final String title;
+  const MyHomePage({super.key,required this.title});
+
+  @override
+  Widget build(BuildContext context){
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
+      color:Theme.of(context).primaryColor ,git stuatuts
+
+      child: Scaffold(
         appBar: AppBar(
-          title: const Text('My Home Page'),
+          centerTitle: true,
+          title: Text(title),
         ),
-        body: Center(
-          child: Builder(
-            builder: (context) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+
+        body:Row(
+          children: [
+            Expanded( // side bar
+              child: Container(
+                color: Colors.blue,
+                margin: const EdgeInsets.all(10),
+              ),
+            ),
+            Expanded(
+              flex:4,
+              child: Column(
                 children: [
-                   Container(
-                    height: 100,
-                    width: 200,
-                    color: Colors.red,
-                    child: const Center(
-                      child: Text('Hello, World!', style: TextStyle(fontSize: 20,),),
+                  Expanded(// top bar
+                    child: Container(
+                      color: Colors.red,
+                      margin: const EdgeInsets.all(10),
+
                     ),
                   ),
-                  const Text('Hello, World!'),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      print('Click!');
-                    },
-                    child: const Text('A button'),
+                  Expanded( // bottom bar
+                    child: Container(
+                      color: Colors.green,
+                      margin: const EdgeInsets.all(10),
+
+                    ),
                   ),
-                ],
-              );
-            },
-          ),
+                ]
+              )
+            )
+          ],
+
         ),
+
       ),
+
     );
   }
 }
