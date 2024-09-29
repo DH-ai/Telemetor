@@ -63,13 +63,10 @@ class MyHomePage extends StatelessWidget{
                 children: [
                   Expanded(// top bar
                     child: Container(
-                      color: Colors.red,
+                      color: Colors.black,
                       margin: const EdgeInsets.all(10),
-                      child: LineChart(
-                        LineChartData(
-
-                        ),
-                      ),
+                      padding: const EdgeInsets.all(20),
+                      child: AltitudeChart(),
 
                     ),
                   ),
@@ -88,6 +85,71 @@ class MyHomePage extends StatelessWidget{
         ),
 
       ),
+
+    );
+  }
+  List<FlSpot> x3func(){
+    List <FlSpot> x3 = [];
+    for (int i=0;i<10;i++){
+      x3.add(FlSpot(i.toDouble(), i.toDouble()*i.toDouble()*i.toDouble()));
+    }
+    for (int i=10;i<20;i++){
+      x3.add(FlSpot(i.toDouble(), 10*10*10*2-1*i.toDouble()*i.toDouble()*i.toDouble()));
+
+    }
+    return x3 ;
+  }
+
+
+}
+
+class AltitudeChart extends StatefulWidget {
+
+  const AltitudeChart({super.key});
+  @override
+  State<AltitudeChart> createState() => _AltitudeChartState();
+}
+class _AltitudeChartState extends State<AltitudeChart> {
+  List
+
+
+
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return LineChart(
+
+      LineChartData(
+          // minX: -100,
+          // maxX: 30,30
+          // minY: -100,
+          // maxY: 100,
+          // gridData: FlGridData(show: false), for the grid
+
+          titlesData: const FlTitlesData(
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+          ),
+        lineBarsData: [LineChartBarData(
+          spots: [FlSpot(1, 1)],
+          color: Colors.red,
+          // isStepLineChart: true,
+          barWidth: 1,
+          dotData: const FlDotData(show: false),
+        ),
+        ],
+        backgroundColor: Colors.black
+
+
+
+      ),
+
 
     );
   }
