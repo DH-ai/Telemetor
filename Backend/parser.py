@@ -1,7 +1,7 @@
 import csv
 import pandas as pd
 import time 
-
+import socket
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
