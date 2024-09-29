@@ -2,6 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'dart:io';
+import 'dart:async';
+import 'package:csv/csv.dart';
 
 
 void main (){
@@ -61,6 +65,11 @@ class MyHomePage extends StatelessWidget{
                     child: Container(
                       color: Colors.red,
                       margin: const EdgeInsets.all(10),
+                      child: LineChart(
+                        LineChartData(
+
+                        ),
+                      ),
 
                     ),
                   ),
