@@ -47,7 +47,7 @@ class MyHomePage extends StatelessWidget {
           title: Text(title),
         ),
         body: const Padding(
-    padding:  EdgeInsets.all(50),
+    padding: EdgeInsets.fromLTRB(10,10,70,10),
     child:  RowApp(),
       ),
     ),
@@ -199,6 +199,19 @@ class _AltitudeChartState extends State<AltitudeChart> {
       ),
     );
   }
+}
+
+
+class CsvAltChart extends StatefulWidget{
+  const CsvAltChart({super.key});
+  @override
+  State<CsvAltChart> createState()=> _CsvAltChartState();
+
+}
+
+class _CsvAltChartState extends State<CsvAltChart>{
+
+
 }
 
 
