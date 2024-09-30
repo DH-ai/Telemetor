@@ -12,7 +12,7 @@ void main() {
 
 }
 
-//
+
 
 class MyApp extends StatelessWidget {
 
@@ -59,11 +59,31 @@ class MyHomePage extends StatelessWidget {
                 child: Column(children: [
                   Expanded(
                     // top bar
-                    child: Container(
-                      color: Colors.black,
+                    child:  Container(
+                      // color: Colors.black,
                       margin: const EdgeInsets.all(10),
                       padding: const EdgeInsets.all(20),
-                      child: const AltitudeChart(),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              color: Colors.black,
+                              margin: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(20),
+                              child: const AltitudeChart(),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              color: Colors.black,
+                              margin: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(20),
+                              child: const AltitudeChart(),
+                            ),
+                          ),
+                        ],
+                      ),
+
                     ),
                   ),
                   Expanded(
@@ -71,6 +91,7 @@ class MyHomePage extends StatelessWidget {
                     child: Container(
                       color: Theme.of(context).primaryColor,
                       margin: const EdgeInsets.all(10),
+                      child: const AltitudeChart(),
                     ),
                   ),
                 ]))
@@ -135,6 +156,8 @@ class _AltitudeChartState extends State<AltitudeChart> {
   Widget build(BuildContext context) {
     return LineChart(
       LineChartData(
+        // gridData: const FlGridData(show: false), no grids
+        borderData: FlBorderData(show: false),
         minX: 0,
         maxX: 100,
         minY: y_min!,
@@ -147,6 +170,7 @@ class _AltitudeChartState extends State<AltitudeChart> {
             barWidth: 1,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
+
 
             // isStrokeCapRound: true,
           ),
