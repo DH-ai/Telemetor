@@ -70,7 +70,7 @@ if __name__ == '__main__':
         line.set_data(x, y)
         return line,
 
-    ani = animation.FuncAnimation(fig, animate, frames=len(df[' time']), init_func=init, blit=True, interval=50)
+    ani = animation.FuncAnimation(fig, animate, frames=len(df[' time']), init_func=init, blit=True, interval=10)
 
     plt.show()
     

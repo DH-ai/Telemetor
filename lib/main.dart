@@ -7,12 +7,15 @@ import 'package:csv/csv.dart';
 import 'dart:math';
 
 void main() {
+
   runApp(const MyApp());
+
 }
 
 //
 
 class MyApp extends StatelessWidget {
+
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
@@ -60,7 +63,7 @@ class MyHomePage extends StatelessWidget {
                       color: Colors.black,
                       margin: const EdgeInsets.all(10),
                       padding: const EdgeInsets.all(20),
-                      child: AltitudeChart(),
+                      child: const AltitudeChart(),
                     ),
                   ),
                   Expanded(
@@ -97,7 +100,7 @@ class AltitudeChart extends StatefulWidget {
 }
 
 class _AltitudeChartState extends State<AltitudeChart> {
-  List<FlSpot> _datapoints = [FlSpot(0, 0)];
+  final List<FlSpot> _datapoints = [const FlSpot(0, 0)];
 
   double _time = 0;
   double? y_max = 10;
@@ -115,12 +118,12 @@ class _AltitudeChartState extends State<AltitudeChart> {
       setState(() {
         _time += 1;
         // print(_time);
-        double _altVal = _altitudeValues(_time);
-        _datapoints.add(FlSpot(_time, _altVal));
-        y_max = y_max ?? _altVal;
-        y_max = max(y_max!, _altVal);
-        y_min = y_min ?? _altVal;
-        y_min = min(y_min!, _altVal);
+        double altVal = _altitudeValues(_time);
+        _datapoints.add(FlSpot(_time, altVal));
+        y_max = y_max ?? altVal;
+        y_max = max(y_max!, altVal);
+        y_min = y_min ?? altVal;
+        y_min = min(y_min!, altVal);
         if (_time > 90) {
           timer.cancel();
         }
@@ -156,3 +159,10 @@ class _AltitudeChartState extends State<AltitudeChart> {
     );
   }
 }
+
+
+
+
+
+
+
