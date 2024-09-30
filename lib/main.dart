@@ -41,63 +41,16 @@ class MyHomePage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
       color: Theme.of(context).primaryColor,
       child: Scaffold(
+
         appBar: AppBar(
           centerTitle: true,
           title: Text(title),
         ),
-        body: Row(
-          children: [
-            Expanded(
-              // side bar
-              child: Container(
-                color: Theme.of(context).primaryColor,
-                margin: const EdgeInsets.all(10),
-              ),
-            ),
-            Expanded(
-                flex: 4,
-                child: Column(children: [
-                  Expanded(
-                    // top bar
-                    child:  Container(
-                      // color: Colors.black,
-                      margin: const EdgeInsets.all(10),
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              color: Colors.black,
-                              margin: const EdgeInsets.all(10),
-                              padding: const EdgeInsets.all(20),
-                              child: const AltitudeChart(),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              color: Colors.black,
-                              margin: const EdgeInsets.all(10),
-                              padding: const EdgeInsets.all(20),
-                              child: const AltitudeChart(),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    ),
-                  ),
-                  Expanded(
-                    // bottom bar
-                    child: Container(
-                      color: Theme.of(context).primaryColor,
-                      margin: const EdgeInsets.all(10),
-                      child: const AltitudeChart(),
-                    ),
-                  ),
-                ]))
-          ],
-        ),
+        body: const Padding(
+    padding:  EdgeInsets.all(50),
+    child:  RowApp(),
       ),
+    ),
     );
   }
 
@@ -111,6 +64,69 @@ class MyHomePage extends StatelessWidget {
           10 * 10 * 10 * 2 - 1 * i.toDouble() * i.toDouble() * i.toDouble()));
     }
     return x3;
+  }
+}
+
+class RowApp extends StatelessWidget {
+  const RowApp({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+
+      children: [
+        Expanded(
+          // side bar
+          child: Container(
+            color: Theme.of(context).primaryColor,
+            margin: const EdgeInsets.all(10),
+          ),
+        ),
+        Expanded(
+            flex: 4,
+            child: Column(children: [
+              Expanded(
+                // top bar
+                child:  Container(
+                  // color: Colors.black,
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          // color: Colors.black,
+                          margin: const EdgeInsets.all(10),
+                          // padding: const EdgeInsets.all(20),
+                          child: const AltitudeChart(),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          // color: Colors.black,
+                          margin: const EdgeInsets.all(10),
+                          // padding: const EdgeInsets.all(20),
+                          child: const AltitudeChart(),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                ),
+              ),
+              Expanded(
+                // bottom bar
+                child: Container(
+                  color: Theme.of(context).primaryColor,
+                  margin: const EdgeInsets.all(10),
+                  child: const AltitudeChart(),
+                ),
+              ),
+            ]))
+      ],
+    );
   }
 }
 
@@ -157,7 +173,11 @@ class _AltitudeChartState extends State<AltitudeChart> {
     return LineChart(
       LineChartData(
         // gridData: const FlGridData(show: false), no grids
-        borderData: FlBorderData(show: false),
+        // borderData: FlBorderData(show: true),
+        titlesData: const FlTitlesData(
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
         minX: 0,
         maxX: 100,
         minY: y_min!,
@@ -175,10 +195,7 @@ class _AltitudeChartState extends State<AltitudeChart> {
             // isStrokeCapRound: true,
           ),
         ],
-        titlesData: const FlTitlesData(
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-        ),
+
       ),
     );
   }
