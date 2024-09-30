@@ -1,22 +1,18 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:csv/csv.dart';
+import 'dart:math';
 
-
-void main (){
+void main() {
   runApp(const MyApp());
 }
 
 //
 
-class MyApp extends StatelessWidget{
-
-
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
@@ -26,131 +22,137 @@ class MyApp extends StatelessWidget{
       theme: ThemeData(
         primarySwatch: Colors.blue,
         brightness: Brightness.dark,
-     ),
+      ),
       home: const MyHomePage(title: 'Telemetor'),
     );
   }
 }
 
-
-class MyHomePage extends StatelessWidget{
+class MyHomePage extends StatelessWidget {
   final String title;
-  const MyHomePage({super.key,required this.title});
+  const MyHomePage({super.key, required this.title});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-      color:Theme.of(context).primaryColor,
-
+      color: Theme.of(context).primaryColor,
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
           title: Text(title),
         ),
-
-        body:Row(
+        body: Row(
           children: [
-            Expanded( // side bar
+            Expanded(
+              // side bar
               child: Container(
-                color: Colors.blue,
+                color: Theme.of(context).primaryColor,
                 margin: const EdgeInsets.all(10),
               ),
             ),
             Expanded(
-              flex:4,
-              child: Column(
-                children: [
-                  Expanded(// top bar
+                flex: 4,
+                child: Column(children: [
+                  Expanded(
+                    // top bar
                     child: Container(
                       color: Colors.black,
                       margin: const EdgeInsets.all(10),
                       padding: const EdgeInsets.all(20),
                       child: AltitudeChart(),
-
                     ),
                   ),
-                  Expanded( // bottom bar
+                  Expanded(
+                    // bottom bar
                     child: Container(
-                      color: Colors.green,
+                      color: Theme.of(context).primaryColor,
                       margin: const EdgeInsets.all(10),
-
                     ),
                   ),
-                ]
-              )
-            )
+                ]))
           ],
-
         ),
-
       ),
-
     );
   }
-  List<FlSpot> x3func(){
-    List <FlSpot> x3 = [];
-    for (int i=0;i<10;i++){
-      x3.add(FlSpot(i.toDouble(), i.toDouble()*i.toDouble()*i.toDouble()));
-    }
-    for (int i=10;i<20;i++){
-      x3.add(FlSpot(i.toDouble(), 10*10*10*2-1*i.toDouble()*i.toDouble()*i.toDouble()));
 
+  List<FlSpot> x3func() {
+    List<FlSpot> x3 = [];
+    for (int i = 0; i < 10; i++) {
+      x3.add(FlSpot(i.toDouble(), i.toDouble() * i.toDouble() * i.toDouble()));
     }
-    return x3 ;
+    for (int i = 10; i < 20; i++) {
+      x3.add(FlSpot(i.toDouble(),
+          10 * 10 * 10 * 2 - 1 * i.toDouble() * i.toDouble() * i.toDouble()));
+    }
+    return x3;
   }
-
-
 }
 
 class AltitudeChart extends StatefulWidget {
-
   const AltitudeChart({super.key});
   @override
   State<AltitudeChart> createState() => _AltitudeChartState();
 }
+
 class _AltitudeChartState extends State<AltitudeChart> {
-  List
+  List<FlSpot> _datapoints = [FlSpot(0, 0)];
 
+  double _time = 0;
+  double? y_max = 10;
+  double? y_min = 10;
 
+  double _altitudeValues(double time) {
+    return (time*sin(time)).toDouble() / 5;
+  }
 
-}
+  @override
+  void initState() {
+    super.initState();
 
+    Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      setState(() {
+        _time += 1;
+        // print(_time);
+        double _altVal = _altitudeValues(_time);
+        _datapoints.add(FlSpot(_time, _altVal));
+        y_max = y_max ?? _altVal;
+        y_max = max(y_max!, _altVal);
+        y_min = y_min ?? _altVal;
+        y_min = min(y_min!, _altVal);
+        if (_time > 90) {
+          timer.cancel();
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return LineChart(
-
       LineChartData(
-          // minX: -100,
-          // maxX: 30,30
-          // minY: -100,
-          // maxY: 100,
-          // gridData: FlGridData(show: false), for the grid
+        minX: 0,
+        maxX: 100,
+        minY: y_min!,
+        maxY: y_max!,
+        lineBarsData: [
+          LineChartBarData(
+            spots: _datapoints,
+            isCurved: true,
+            color: Colors.red,
+            barWidth: 1,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
 
-          titlesData: const FlTitlesData(
-            rightTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            topTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            // isStrokeCapRound: true,
           ),
-        lineBarsData: [LineChartBarData(
-          spots: [FlSpot(1, 1)],
-          color: Colors.red,
-          // isStepLineChart: true,
-          barWidth: 1,
-          dotData: const FlDotData(show: false),
-        ),
         ],
-        backgroundColor: Colors.black
-
-
-
+        titlesData: const FlTitlesData(
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+        ),
       ),
-
-
     );
   }
 }
