@@ -209,10 +209,6 @@ class CsvAltChart extends StatefulWidget{
 
 }
 
-class _CsvAltChartState extends State<CsvAltChart>{
-
-
-}
 
 
 
