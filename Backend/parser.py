@@ -29,15 +29,15 @@ if __name__ == '__main__':
     df2.columns = head2
     
 
-    df = df1.dropna(subset=[' time', ' temperature']).loc[0:1000]
+    df = df1.dropna(subset=[' time', ' alt']).loc[0:1000]
     df[' time'] = df[' time'].astype(float)
-    df[' temperature'] = df[' temperature'].astype(float)
+    df[' alt'] = df[' alt'].astype(float)
     df[' time'] = df[ ' time'] - df[' time'][0]
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
     
-    line, = ax.plot(df[' time'], df[' temperature'], lw=2)
+    line, = ax.plot(df[' time'], df[' alt'], lw=2)
     ax.set_xlim(df[' time'].min(), df[' time'].max())
-    ax.set_ylim(df[' temperature'].min(), df[' temperature'].max())
+    ax.set_ylim(df[' alt'].min(), df[' alt'].max())
     ax.set_title('Altitude vs Time')
     ax.set_xlabel('Time')
     ax.set_ylabel('Altitude')
@@ -49,13 +49,13 @@ if __name__ == '__main__':
 
     def animate(i):
         x = df[' time'][:i]
-        y = df[' temperature'][:i]
+        y = df[' alt'][:i]
         line.set_data(x, y)
         return line,
 
 
     ani = animation.FuncAnimation(fig, animate, frames=len(df[' time']), init_func=init, blit=True, interval=10)
     ani2 = animation.FuncAnimation(fig, animate, frames=len(df[' time']), init_func=init, blit=True, interval=10)
+
+
     plt.show()
-
-
