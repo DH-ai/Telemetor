@@ -16,15 +16,18 @@ void main () {
       csvData = value;
       // print(csvData);
     }
-  ).whenComplete(
-    () {
-
-      print("done");
-
-    }
   );
   (data as Future).then((value){
-    List<int> nullRow = nullChecker(value[0]);
+    List<List<int>> nullRow = [];
+    print(int.parse((value[0][18]).toString()));
+    for ( int i = 0; i < value.length; i++) {
+      nullRow.add(nullChecker(value[i]));
+    }
+    print("done");
+    // print(nullRow);
+
+
+
 
   });
 }
@@ -44,10 +47,10 @@ Future<List<List<dynamic>>> dataCsv() async {
 
 }
 
-List<int> nullChecker(List<int> data) {
+List<int> nullChecker(List<dynamic> data) {
   List<int> rowNum= [];
   for (int i = 0; i < data.length; i++) {
-    if (data[i] == null) {
+    if (data[i] == ' time') {
       rowNum.add(i);
     }
   }
