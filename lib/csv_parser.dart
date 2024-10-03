@@ -1,27 +1,32 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
+import 'dart:core';
 import 'package:csv/csv.dart';
+
 
 
 
 
 void main () {
   final data = dataCsv();
-  List<List> csvData ;
+  List<List> csvData=[] ;
   data.then(
-
     (value) {
       csvData = value;
       // print(csvData);
     }
   ).whenComplete(
     () {
+
       print("done");
 
     }
   );
+  (data as Future).then((value){
+    List<int> nullRow = nullChecker(value[0]);
 
-
+  });
 }
 
 Future<List<List<dynamic>>> dataCsv() async {
@@ -37,4 +42,14 @@ Future<List<List<dynamic>>> dataCsv() async {
   // print(fields[0]);
   return fields;
 
+}
+
+List<int> nullChecker(List<int> data) {
+  List<int> rowNum= [];
+  for (int i = 0; i < data.length; i++) {
+    if (data[i] == null) {
+      rowNum.add(i);
+    }
+  }
+  return rowNum;
 }
