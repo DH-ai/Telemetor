@@ -202,16 +202,6 @@ class _AltitudeChartState extends State<AltitudeChart> {
 }
 
 
-class CsvAltChart extends StatefulWidget{
-  const CsvAltChart({super.key});
-  @override
-  State<CsvAltChart> createState()=> _CsvAltChartState();
-
-}
-
-
-
-
 
 
 
