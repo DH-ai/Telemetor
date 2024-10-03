@@ -8,7 +8,10 @@
 - [x] Learning about flutter and related tegit chnologies
 - [x] Design the app
 - [ ] Implement the app
-- [ ] Working on the backend to get data for prerpocessing
-- [ ] Preprocessing the data and working on plots
+  - [ ] Parser Python
+  - [ ] Parser Dart
+  - [ ] Implementing Sockets
+  - [ ] Creating Serializer and Deserializer for proper data transfer
+  - [ ] Implementing the UI
 - [ ] Wokring on the testing and deployment
 - [ ] 2024-10-15: Finished the project
