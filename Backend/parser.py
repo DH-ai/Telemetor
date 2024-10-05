@@ -29,6 +29,7 @@ if __name__ == '__main__':
     df2.columns = head2
     
 
+
     df = df1.dropna(subset=[' time', ' temperature', ' alt', ' bno_x', ' bno_y', ' bno_z']).loc[0:1000]
 
 
@@ -69,6 +70,7 @@ if __name__ == '__main__':
     ax[1].set_ylabel('Bno_Y')
     ax[2].set_ylabel('Bno_Z')
     ax[3].set_ylabel('Altitude')
+
  
 
     def init0():
@@ -117,3 +119,4 @@ if __name__ == '__main__':
     plt.show()
 
 
+    plt.show()
