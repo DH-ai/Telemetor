@@ -9,6 +9,8 @@ import 'package:csv/csv.dart';
 
 
 void main () {
+
+
   final data = dataCsv();
   List<List> csvData=[] ;
   data.then(
@@ -17,6 +19,9 @@ void main () {
       // print(csvData);
     }
   );
+
+
+
   (data as Future).then((value){
     List<List<int>> nullRow = [];
     print(int.parse((value[0][18]).toString()));
@@ -24,13 +29,9 @@ void main () {
       nullRow.add(nullChecker(value[i]));
     }
     print("done");
-    // print(nullRow)
+  }); // data value printed
 
-
-
-
-  });
-}
+} //accessing data from csv file
 
 Future<List<List<dynamic>>> dataCsv() async {
   final input =   File('D:/Obfuscation/telemetor/Backend/rocket.csv').openRead();
@@ -45,7 +46,7 @@ Future<List<List<dynamic>>> dataCsv() async {
   // print(fields[0]);
   return fields;
 
-}
+} // reading data from csv file asynchronously
 
 List<int> nullChecker(List<dynamic> data) {
   List<int> rowNum= [];
@@ -55,4 +56,5 @@ List<int> nullChecker(List<dynamic> data) {
     }
   }
   return rowNum;
-}
+} // checking for null values in the data
+
