@@ -17,13 +17,19 @@ class Header:
 
         
 
-
+## Main csv to json converter class 
 class CsvToJson:
     def __init__(self, file_path):
         self.file_path = file_path
         self.header = []
         self.type:str = None
         self.data = None
+        self.jsonObj = None
+        
+
+    
+    
+    def readCsv(self):
         with open(self.file_path, 'r') as file:
             reader = csv.reader(file)
             data = list(reader)
@@ -31,16 +37,44 @@ class CsvToJson:
             
             self.header = Header(self.data[0],self.data[1])
 
-    def printTH(self,typ:str=None):
+    def printCSV(self,typ:str=None):
+
         if (typ=="H"or typ=="h"):
             print(list(item for item in self.header.headers))
         elif (typ=="T"or typ=="T"):
             print(list(item for item in self.header.types))
         else:
             print(list(item for item in self.header.headers))
-            
 
-          
+    def convertToJson(self):
+        jsonObj = {}
 
-CsvToJson('D:\Obfuscation/telemetor/Backend/rocket.csv').printTH()
+        return jsonObj
 
+
+
+    def saveJson(self,optPath:str=None,name:str=None):
+        pass
+    def saveCSV(self,optPath:str=None,name:str=None):
+        pass
+
+    def nullCheck(self,Row:int=0,Col:int=None):
+        pass
+
+    
+    
+
+# CsvToJson('D:\Obfuscation/telemetor/Backend/rocket.csv').printTH()
+
+dicti= {
+    "key":12,
+    "key":12,
+    "key":12,
+    "key2":{
+        "hello":"1",
+        "world":"223",
+        "fuckk":123,
+    }
+}
+
+packet=json.dumps(dicti,indent=4)
