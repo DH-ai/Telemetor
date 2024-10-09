@@ -2,7 +2,9 @@ import csv
 # import  pandas as pd
 import json
 import errno
+import time
 
+from typing import Union
 class Header:
     def __init__  (self, *args):
         self.headers = []
@@ -17,13 +19,20 @@ class Header:
 
 ## Main csv to json converter class 
 class CsvToJson:
-    def __init__(self, file_path):
+    def __init__(self, file_path=None,data:Union[dict,list]=None):
+        assert (data is not None and file_path is  None) or (data is  None and file_path is not None), "Either data or file_path must be provided, but not both."
         self.file_path = file_path
         self.header = []
         self.type:str = None
         self.data = None
+        if file_path is None:
+            self.data = data
         self.jsonObj = None
-         
+        self._lastindex = len(self.data)
+            
+   
+   
+   
     def readCsv(self):
         with open(self.file_path, 'r') as file:
             reader = csv.reader(file)
@@ -41,9 +50,9 @@ class CsvToJson:
         else:
             print(list(item for item in self.header.headers))
 
-    def convertToJson(self,data=None):
+    def convertToJson(self,data,ident:int=None):
         jsonObj = {}
-        jsonObj = json.dumps(data)
+        jsonObj = json.dumps(data,indent=ident)
         return jsonObj
 
     def saveJson(self,optPath:str=None,name:str=None,data:str=None):
@@ -77,24 +86,45 @@ class CsvToJson:
             print("An error occured")
         else:
             print("File saved as "+name+".csv")
+     
 
-    def 
 
-
-    def nullCheck(self,Row:int=0,Col:int=None):     
+   
         
         pass
-
     
+    def __str__(self):
+        return "CsvToJson"
     
+    def packet(self):
+        dictNew=list()
+        for i in range(self._lastindex,len(self.data)):
+            dictNew.append( self.data[i])
+        return dictNew
 
-dicti = list((
-    {1,2,3,4,5},
-    {2,3,4,4,55},
-    {13,22,23,43,35},
-)
-)
-CsvToJson("D:/Obfuscation/telemetor/Backend/rocket.csv").saveCSV(".", "test", dicti)
+dicti = [
+    [1,2,3,4,5],
+    [2,3,4,4,55],
+    [13,22,23,43,35],
+]
 
+
+
+
+data = CsvToJson(data=dicti)
+
+
+# print(data.data)
+# time.sleep(2)
+dicti.append([10,20,30,40,50])
+dicti.append([20,30,40,40,550])
+print(iter(dicti))
+
+
+iterable = iter(dicti)
+
+
+print(data.convertToJson(data.packet(),4))
+# dict(dicti
 
 
