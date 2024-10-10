@@ -3,7 +3,6 @@ import csv
 import json
 import errno
 import time
-
 from typing import Union
 class Header:
     def __init__  (self, *args):
@@ -33,9 +32,6 @@ class CsvToJson:
         except Exception as e:
             self._lastindex = 0
             print(f"An error occured {e}")
-            
-   
-   
    
     def readCsv(self,header:bool=False,headerrows:int=2)-> None:
         
@@ -56,7 +52,6 @@ class CsvToJson:
             print("File not found")
         except Exception as e:
             print(e)
-            
 
     def printCSV(self,typ:str=None):
 
