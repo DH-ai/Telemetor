@@ -9,9 +9,10 @@
 - [x] Design the app
 - [ ] Implement the app
   - [ ] Parser Python
+  - [ ] Threading 
+  - [ ] Sockets
   - [ ] Parser Dart
-  - [ ] Implementing Sockets
-  - [ ] Creating Serializer and Deserializer for proper data transfer
+  - [ ] Implementing Sockets in dart
   - [ ] Implementing the UI
 - [ ] Wokring on the testing and deployment
 - [ ] 2024-10-15: Finished the project

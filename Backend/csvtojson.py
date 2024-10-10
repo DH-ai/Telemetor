@@ -28,21 +28,35 @@ class CsvToJson:
         if file_path is None:
             self.data = data
         self.jsonObj = None
-        self._lastindex = len(self.data)
+        try: 
+            self._lastindex = len(self.data)
+        except Exception as e:
+            self._lastindex = 0
+            print(f"An error occured {e}")
             
    
    
    
     def readCsv(self,header:bool=False,headerrows:int=2)-> None:
+        
         try:
+            if self.file_path is None and self.data is not None :
+                raise Exception("Can't read csv when data is provided")
+                
             with open(self.file_path, 'r') as file:
                 reader = csv.reader(file)
                 data = list(reader)
                 self.data =data
                 if header:
                     self.header = Header(*[self.data[header] for header in range(len(headerrows))])
-        except :
-
+        except TypeError as e:
+            
+            print(f"File path can't be none {e}")
+        except FileNotFoundError as e:
+            print("File not found")
+        except Exception as e:
+            print(e)
+            
 
     def printCSV(self,typ:str=None):
 
@@ -108,7 +122,8 @@ dicti = [
 
 
 
-data = CsvToJson(data=dicti)
+CsvToJson(data=dicti).readCsv()
 
+print("WREW")
 
 
