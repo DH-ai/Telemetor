@@ -1,4 +1,4 @@
-b'F', time, state, temperature, alt, ram_diff, bno_x, bno_y, bno_z, high_x, high_y, high_z, gyro_x, gyro_y, gyro_z,,,,
+b'F', time, state, temperature, alt, ram_diff, bno_x, bno_y, bno_z, high_x, high_y, high_z, gyro_x, gyro_y, gyro_z, , , ,
 b'S',lat(deg),lat(min),lat(sec),lat(N/W),lon(deg),lon(min),lon(sec),lon(E/W),v_horizontal,course,hdop,vdop,type,alt(ABL),fix_time_since_start,time_since_fix,,
 b'S',32,56,21.77032471,78,106,54,42.71690369,87,0.02,0,1.02,1.44,b'ROV',86.01635742,3104,83,,
 b'S',32,56,21.77032471,78,106,54,42.71690369,87,0.02,0,1.02,1.44,b'VNC',86.01635742,3104,264,,

@@ -11,7 +11,7 @@ def parse_csv(file_path):
         data = list(reader)
     return data
 
-file_path = 'D:\Obfuscation/telemetor/Backend/rocket.csv'
+file_path = 'D:/Obfuscation/telemetor/Backend/rocket.csv'
 
 if __name__ == '__main__':
   
@@ -22,19 +22,23 @@ if __name__ == '__main__':
     head1= ["b'F'", ' time', ' state', ' temperature', ' alt', ' ram_diff', ' bno_x', ' bno_y', ' bno_z', ' high_x', ' high_y', ' high_z', ' gyro_x', ' gyro_y', ' gyro_z', '', '', '', '']
 
     head2 = ["b'S'", 'lat(deg)', 'lat(min)', 'lat(sec)', 'lat(N/W)', 'lon(deg)', 'lon(min)', 'lon(sec)', 'lon(E/W)', 'v_horizontal', 'course', 'hdop', 'vdop', 'type', 'alt(ABL)', 'fix_time_since_start', 'time_since_fix', '', '']
-    df1 = pd.DataFrame(_bF)
-    df1.columns = head1
+    # print(_bF[0])
+    print(type(_bF))
 
-    df2 = pd.DataFrame(_bS)
-    df2.columns = head2
+    df1 = pd.DataFrame(iter(_bF), columns=head1)
+    print(df1)
+    exit()
+
     
 
-
+    
     df = df1.dropna(subset=[' time', ' temperature', ' alt', ' bno_x', ' bno_y', ' bno_z']).loc[0:1000]
 
 
-
     df[' time'] = df[' time'].astype(float)
+    # for i in range (100):
+    #     print(df[' time'][i] - df[' time'][0])
+        
     df[' temperature'] = df[' temperature'].astype(float)
     df[' alt'] = df[' alt'].astype(float)
     df[' bno_x'] = df[ ' bno_x'].astype(float)
