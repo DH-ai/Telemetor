@@ -33,13 +33,16 @@ class CsvToJson:
    
    
    
-    def readCsv(self):
-        with open(self.file_path, 'r') as file:
-            reader = csv.reader(file)
-            data = list(reader)
-            self.data =data
-            
-            self.header = Header(self.data[0],self.data[1])
+    def readCsv(self,header:bool=False,headerrows:int=2)-> None:
+        try:
+            with open(self.file_path, 'r') as file:
+                reader = csv.reader(file)
+                data = list(reader)
+                self.data =data
+                if header:
+                    self.header = Header(*[self.data[header] for header in range(len(headerrows))])
+        except :
+
 
     def printCSV(self,typ:str=None):
 
@@ -50,12 +53,12 @@ class CsvToJson:
         else:
             print(list(item for item in self.header.headers))
 
-    def convertToJson(self,data,ident:int=None):
+    def convertToJson(self,data,ident:int=None)-> str:
         jsonObj = {}
         jsonObj = json.dumps(data,indent=ident)
         return jsonObj
 
-    def saveJson(self,optPath:str=None,name:str=None,data:str=None):
+    def saveJson(self,optPath:str=None,name:str=None,data:str=None)-> None:
         jsonObj = json.loads(data)
         jsonFile = optPath+"/"+name+".json"
         try:
@@ -70,7 +73,7 @@ class CsvToJson:
         else:
             print("File saved as "+name+".json")
 
-    def saveCSV(self,optPath:str=None,name:str=None,data:list=None):
+    def saveCSV(self,optPath:str=None,name:str=None,data:list=None)-> None:
         csvFile = optPath+"/"+name+".csv"
         data = iter(data)
         try:
@@ -86,12 +89,6 @@ class CsvToJson:
             print("An error occured")
         else:
             print("File saved as "+name+".csv")
-     
-
-
-   
-        
-        pass
     
     def __str__(self):
         return "CsvToJson"
@@ -113,18 +110,5 @@ dicti = [
 
 data = CsvToJson(data=dicti)
 
-
-# print(data.data)
-# time.sleep(2)
-dicti.append([10,20,30,40,50])
-dicti.append([20,30,40,40,550])
-print(iter(dicti))
-
-
-iterable = iter(dicti)
-
-
-print(data.convertToJson(data.packet(),4))
-# dict(dicti
 
 
