@@ -15,7 +15,7 @@ class Header:
             self.headers.remove(item)
         
         
-
+file_path = "D:/Obfuscation/telemetor/Backend/csv-temp/data.csv"
 ## Main csv to json converter class 
 class CsvToJson:
     def __init__(self, file_path=None,data:Union[dict,list]=None):
@@ -24,15 +24,22 @@ class CsvToJson:
         self.header = []
         self.type:str = None
         self.data = None
+        
+        self.__currentindex = 0
         if file_path is None:
             self.data = data
+            self.__currentindex = len(data)
         self.jsonObj = None
-        try: 
-            self._lastindex = len(self.data)
-        except Exception as e:
-            self._lastindex = 0
-            print(f"An error occured {e}")
-   
+        self.__lastindex = 0
+
+
+    @property
+    def currentindex(self):
+        return self.__currentindex
+    @currentindex.setter
+    def currentindex(self, value):
+        raise Exception("Can't set current index")
+    
     def readCsv(self,header:bool=False,headerrows:int=2)-> None:
         
         try:
@@ -52,6 +59,13 @@ class CsvToJson:
             print("File not found")
         except Exception as e:
             print(e)
+        
+        
+        try:
+            self._currentindex = len(self.data)
+        except Exception as e:
+            self._currentindex = 0
+            print("Unable to set current index ",e)
 
     def printCSV(self,typ:str=None):
 
@@ -102,23 +116,32 @@ class CsvToJson:
     def __str__(self):
         return "CsvToJson"
     
+    
+    def __updateData(self):
+        if self.file_path is not None:
+            with open(self.file_path, 'r') as file:
+                reader = csv.reader(file)
+                data = list(reader)
+                self.data =data
+                
+        else:
+            self.data = self.data
     def packet(self):
         dictNew=list()
-        for i in range(self._lastindex,len(self.data)):
+        for i in range(self.__lastindex,len(self.data)):
             dictNew.append( self.data[i])
+        self.__currentindex = len(self.data)-1
+        self.__lastindex = self.__currentindex+1
+        
+        
+        self.__updateData()
         return dictNew
 
-dicti = [
-    [1,2,3,4,5],
-    [2,3,4,4,55],
-    [13,22,23,43,35],
-]
+# data = [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15]]
 
+# csv_obj = CsvToJson(data=data)
 
+# print(csv_obj.packet())
 
-
-CsvToJson(data=dicti).readCsv()
-
-print("WREW")
 
 
