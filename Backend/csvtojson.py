@@ -29,6 +29,7 @@ class CsvToJson:
         if file_path is None:
             self.data = data
             self.__currentindex = len(data)
+            self.header = Header(*[data[header] for header in range(0,1)])
         self.jsonObj = None
         self.__lastindex = 0
 
@@ -51,7 +52,8 @@ class CsvToJson:
                 data = list(reader)
                 self.data =data
                 if header:
-                    self.header = Header(*[self.data[header] for header in range(len(headerrows))])
+                    print("reading header")
+                    self.header = Header(*[self.data[header] for header in range(0,headerrows)])
         except TypeError as e:
             
             print(f"File path can't be none {e}")

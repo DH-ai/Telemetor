@@ -44,14 +44,14 @@ def read_csv():
             time.sleep(1)
             num = len(csv_obj.packet())
             if num>0:
-                print("Packet: ",num,"Current Index: ",csv_obj.currentindex)
+                print("Packet: ",num,"Current Index: ",csv_obj.currentindex,csv_obj.header.headers)
             
     except Exception as e:
         print("Some error occured ",e)
 
 
 def main ():
-
+    
     t1 = threading.Thread(target=populate_csv)
     t2 = threading.Thread(target=read_csv)
     t1.start()
