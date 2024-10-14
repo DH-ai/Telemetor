@@ -21,7 +21,7 @@ class  CsvToJson:
     def __init__(self, file_path=None,data:Union[dict,list]=None):
         assert (data is not None and file_path is  None) or (data is  None and file_path is not None), "Either data or file_path must be provided, but not both."
         self.file_path = file_path
-        self.header = []
+        self.header:Header = None
         self.type:str = None
         self.data = None
         
@@ -54,6 +54,7 @@ class  CsvToJson:
                 if header:
                     print("reading header")
                     self.header = Header(*[self.data[header] for header in range(0,headerrows)])
+                    
         except TypeError as e:
             
             print(f"File path can't be none {e}")

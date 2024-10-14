@@ -23,7 +23,7 @@ logging.basicConfig(
 ### Temperary code To simulate the data flow stream
 
 def populate_csv():
-    with open('D:/Obfuscation/telemetor/Backend/csv-temp/data.csv', 'w') as file:
+    with open(TEMPPATH, 'w') as file:
         writer = csv.writer(file,lineterminator='\n')
         writer.writerow(['A', 'B', 'C', 'D', 'E'])
     for i in range(100):
@@ -36,7 +36,7 @@ def populate_csv():
             for i in range(1, num):
                 writer.writerow([random.randint(1,100) for j in range(5)])
 
-            print(f"{time.thread_time()} Appended ",num-1," rows to the csv")
+            logging.info("Appended {} rows to the csv".format(num-1))
 
 
 
@@ -60,7 +60,7 @@ class SocketServer:
     def start(self):
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(2)
-        print(f"Server is listening on {self.host}:{self.port}")
+        logging.info(f"Server is listening on {self.host}:{self.port}")
         
         
         accept_thread = threading.Thread(target=self.accept_clients)
@@ -73,7 +73,7 @@ class SocketServer:
         while True:
             client_socket, address = self.server_socket.accept()
             # client_socket.recv(1024)
-            print(f"Connection established with {address}")
+            logging.info(f"Connection established with {address}")
             self.clients.append(client_socket)
             
             
@@ -90,7 +90,7 @@ class SocketServer:
                 data = client_socket.recv(1024)
                 if not data:
                     break
-                print(f"Received: {data.decode('utf-8')}")
+                logging.info(f"Received: {data.decode('utf-8')}")
                 
                 
                 client_socket.send("ACK".encode('utf-8'))
@@ -142,16 +142,21 @@ class DataHandler():
     def parser_csv(self):
         csv_obj = CsvToJson(self.file_path)
         csv_obj.readCsv(header=True,headerrows=2)
-        self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
-        self.state = csv_obj.header.types # b'F' or b'S'
+
+        try:
+            self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
+            self.state = csv_obj.header.types # b'F' or b'S'
+        except Exception as e:
+            logging.error("There is some error in reading the header")
 
         try:
             while True:
                 data = csv_obj.packet()
-                self.data_queue.put(data)
+                if data !=[]:
+                    self.data_queue.put(data)
                 time.sleep(SAMAPLINGTIME)
         except Exception as e:
-            logging.error("There is some error {}".format(e))
+            logging.error("There is some error ")
             
         finally:
             self.process_complete()
@@ -174,20 +179,30 @@ class DataHandler():
 
 
 
+def handle_buffer(bufferQueue):
+    while True:
+        data = bufferQueue.get()
+        
+        # if data ==[]:
+        #     logging.info("Data is None")
+        # else:
+        logging.info("DATA: {}".format(data))
+
 if __name__ == "__main__":
     bufferQueue = Queue()
+    t3 = threading.Thread(target=populate_csv, )
+    t3.start()
     # server = SocketServer()
     # server.start()
     logging.info("Initiating Rocket Launch")
     rocket_laucnh = True
     
     if rocket_laucnh:
-        dataHandler = DataHandler(filePath=FILEPATH,queue=bufferQueue)
+        dataHandler = DataHandler(filePath=TEMPPATH,queue=bufferQueue)
 
-    t3 = threading.Thread(target=populate_csv, )
-    t3.start()
-
-    while True:
-        print(bufferQueue.get(timeout=10))
+    temp = threading.Thread(target=handle_buffer, args=(bufferQueue,))
+    temp.start()
+       
+            
 
 
