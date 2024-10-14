@@ -64,6 +64,7 @@ SAMAPLINGTIME = 100   #100ms
 SAMAPLINGTIME = SAMAPLINGTIME/1000
 FILEPATH = 'D:/Obfuscation/telemetor/Backend/rocket.csv'
 TEMPPATH = 'D:/Obfuscation/telemetor/Backend/csv-temp/data.csv'
+ROCKETLAUNCH = False
 
 
 class SocketServer:
@@ -72,6 +73,9 @@ class SocketServer:
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.clients = [] ## maxing it to 2 to 3 for now 
+        self.dataHandler:DataHandler = None
+        if ROCKETLAUNCH:
+            self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue)
     
     def start(self):
         self.server_socket.bind((self.host, self.port))
@@ -91,39 +95,95 @@ class SocketServer:
                 logging.info("Max clients reached")
                 break
             client_socket, address = self.server_socket.accept()
-            # client_socket.recv(1024)
+            client_socket.recv(1024)
             logging.info(f"Connection established with {address}")
             self.clients.append(client_socket)
 
             ## Implmenting some sort of mechanism to close the connection
-            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
+            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,address))
             client_thread.start()
 
 
 
 
 
-    def handle_client(self, client_socket):
+    def handle_client(self, client_socket,address):
 
 
-        while True:
-            try:
-                ## Acknoledgment Sequence to be implemented 
-                # 1. ACknoledgment of the connection
-                # 2. Sharing of types and data
-                # 3. Sending the Headers and types as a form of acknoledgment 
 
-                
-                
-                
-                client_socket.send("ACK".encode('utf-8'))
-            except ConnectionResetError:
-                break
-        
-        client_socket.close()
-        self.clients.remove(client_socket)
+        ## Acknoledgment Sequence to be implemented 
+        # 1. ACknoledgment of the connection
+        # 2. Sharing of types and data
+        # 3. Sending the Headers and types as a form of acknoledgment 
 
 
+        ACK_SUCCESS = False
+        try:
+            while not ACK_SUCCESS:
+                data = client_socket.recv(1024).decode('utf-8')
+
+                if data == "ACK-CONNECT":
+                    logging.info("Client Connected")
+                    client_socket.send("ACK-EXCHANGE".encode('utf-8'))
+                    data = client_socket.recv(1024).decode('utf-8')
+
+                    if data == "ACK-EXCHANGE":
+                        headers = "Headers{}:Types{}".format(self.dataHandler.header, self.dataHandler.state)
+                        client_socket.send(headers.encode('utf-8'))
+                        data = client_socket.recv(1024).decode('utf-8')
+
+                        if data == "ACK-COMPLETE":
+                            ACK_SUCCESS = True
+                            logging.info("Connection Established")
+                            logging.info("Starting data stream")
+                            ## Starting the data stream
+                            try:
+                                if self.dataHandler is not None:
+                                    self.sending_data(client_socket)
+                            except Exception as e:
+                                logging.error("Unable to Send Data due to {}\n".format(e))
+                                ACK_SUCCESS = False
+                            finally:
+                                if self.dataHandler is  None:
+                                    ACK_SUCCESS = False
+                                    logging.info("Rocket Launch Not Started")
+
+                        else:
+                            logging.error("Connection Failed Data Stream not started")
+                            logging.info("Retrying......")
+                    else:
+                        logging.error("Exchange Failed")
+                        logging.info("Retrying......")
+                else:
+                    logging.error("Connection Failed")
+                    logging.info("Retrying......")
+
+                    
+        except Exception as e: ## not sure about error 
+
+            # Logging the error
+            #   
+
+            pass
+        finally:
+            if not ACK_SUCCESS:
+                client_socket.close()
+                self.clients.remove(client_socket)
+
+        logging.error(f"Unable to establish connection to the client {address}") 
+
+            
+            
+
+                    
+
+                    
+
+    def sending_data(self, client_socket):
+
+        pass
+    
+    
     def get_data():
         data  = bufferQueue.get()
 
@@ -221,10 +281,9 @@ def main(queue):
     # server = SocketServer()
     # server.start()
     logging.info("Initiating Rocket Launch")
-    rocket_laucnh = True
+    ROCKETLAUNCH = True
     
-    if rocket_laucnh:
-        dataHandler = DataHandler(filePath=TEMPPATH, queue=queue)
+    
 
     ## sample thread for handling the buffer
     # temp = threading.Thread(target=handle_buffer, args=(bufferQueue,))
@@ -244,8 +303,10 @@ def main(queue):
 
 if __name__ == "__main__":
     bufferQueue = Queue()
-    main(bufferQueue)
-       
+    # main(bufferQueue)
+    num:bytes = b'\0x00'
+    print(len(num))  
+     
             
 
 
