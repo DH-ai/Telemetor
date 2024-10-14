@@ -8,9 +8,10 @@
 - [x] Learning about flutter and related tegit chnologies
 - [x] Design the app
 - [ ] Implement the app
-  - [ ] Parser Python
-  - [ ] Threading 
-  - [ ] Sockets
+  - [x]Parser Python
+  - [x] Threading
+  - [x] Sockets
+  - [ ] Socket Server
   - [ ] Parser Dart
   - [ ] Implementing Sockets in dart
   - [ ] Implementing the UI

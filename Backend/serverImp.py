@@ -9,4 +9,5 @@ import csvtojson
 
         
 
-
+class Server :
+    def __init__(self,port,)
