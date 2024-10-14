@@ -1,8 +1,7 @@
-## Working on the project
+# Working on the project
 
-### Checklist
+## Checklist
 
- 
 - [x] 2024-09-22: Started the project
 - [x] Learning Dart
 - [x] Learning about flutter and related tegit chnologies
