@@ -124,7 +124,7 @@ class  CsvToJson:
             with open(self.file_path, 'r') as file:
                 reader = csv.reader(file)
                 data = list(reader)
-                self.data =data
+                self.data = data
                 
         else:
             self.data = self.data

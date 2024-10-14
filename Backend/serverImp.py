@@ -12,6 +12,14 @@ import csv ## Might remove this later
 
 
 
+logging.basicConfig(
+    stream=sys.stdout, 
+    level=logging.INFO, 
+    format='%(asctime)s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+
+
 ### Temperary code To simulate the data flow stream
 
 def populate_csv():
@@ -94,7 +102,7 @@ class SocketServer:
 
 
     def get_data():
-
+        data  = bufferQueue.get()
 
         pass
 
@@ -136,11 +144,25 @@ class DataHandler():
         csv_obj.readCsv(header=True,headerrows=2)
         self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
         self.state = csv_obj.header.types # b'F' or b'S'
+
+        try:
+            while True:
+                data = csv_obj.packet()
+                self.data_queue.put(data)
+                time.sleep(SAMAPLINGTIME)
+        except Exception as e:
+            logging.error("There is some error {}".format(e))
+            
+        finally:
+            self.process_complete()
+            
+
         ## data logic to be implemented
 
     def process_complete(self):
         ## this method will be called when the rocket laucnch is completed or data stream is stoped 
         ## ideal time need to be decide
+        logging.info("Data Stream Completed")
         pass
 
 
@@ -150,24 +172,22 @@ class DataHandler():
     # def get_data(self):
     #     return self.data_queue.get()
 
+
+
 if __name__ == "__main__":
+    bufferQueue = Queue()
     # server = SocketServer()
     # server.start()
-    bufferQueue = Queue()
-
-    rocket_laucnh = True
     logging.info("Initiating Rocket Launch")
-    logging.info
+    rocket_laucnh = True
     
     if rocket_laucnh:
         dataHandler = DataHandler(filePath=FILEPATH,queue=bufferQueue)
 
-    logging.basicConfig(
-        stream=sys.stdout, 
-        level=logging.INFO, 
-        format='%(asctime)s - %(message)s',
-        datefmt='%H:%M:%S'
-    )
-    # t3 = threading.Thread(target=populate_csv, )
-    # t3.start()
+    t3 = threading.Thread(target=populate_csv, )
+    t3.start()
+
+    while True:
+        print(bufferQueue.get(timeout=10))
+
 
