@@ -72,7 +72,7 @@ class SocketServer:
         self.host = host
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.clients = [] ## maxing it to 2 to 3 for now 
+        self.clients = [] ## maxing it to 2  for now 
         self.dataHandler:DataHandler = None
         if ROCKETLAUNCH:
             self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue)
@@ -91,7 +91,7 @@ class SocketServer:
 
     def accept_clients(self):
         while True:
-            if len(self.clients) >= 3:
+            if len(self.clients) >= 2:
                 logging.info("Max clients reached")
                 break
             client_socket, address = self.server_socket.accept()
@@ -118,10 +118,13 @@ class SocketServer:
 
 
         ACK_SUCCESS = False
+        retries = 0
         try:
             while not ACK_SUCCESS:
+                if retries > 4:
+                    ACK_SUCCESS = False
+                    break
                 data = client_socket.recv(1024).decode('utf-8')
-
                 if data == "ACK-CONNECT":
                     logging.info("Client Connected")
                     client_socket.send("ACK-EXCHANGE".encode('utf-8'))
@@ -148,17 +151,22 @@ class SocketServer:
                                     ACK_SUCCESS = False
                                     logging.info("Rocket Launch Not Started")
 
+
                         else:
                             logging.error("Connection Failed Data Stream not started")
                             logging.info("Retrying......")
+                            
                     else:
                         logging.error("Exchange Failed")
                         logging.info("Retrying......")
+                        ACK_SUCCESS = False
                 else:
                     logging.error("Connection Failed")
                     logging.info("Retrying......")
+                    ACK_SUCCESS = False
 
-                    
+                retries += 1
+
         except Exception as e: ## not sure about error 
 
             # Logging the error
@@ -169,6 +177,7 @@ class SocketServer:
             if not ACK_SUCCESS:
                 client_socket.close()
                 self.clients.remove(client_socket)
+        
 
         logging.error(f"Unable to establish connection to the client {address}") 
 
