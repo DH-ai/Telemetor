@@ -117,9 +117,9 @@ class CsvToJson:
     
     def __str__(self):
         return "CsvToJson"
-    
-    
+      
     def __updateData(self):
+
         if self.file_path is not None:
             with open(self.file_path, 'r') as file:
                 reader = csv.reader(file)
@@ -128,6 +128,7 @@ class CsvToJson:
                 
         else:
             self.data = self.data
+            
     def packet(self):
         dictNew=list()
         for i in range(self.__lastindex,len(self.data)):
