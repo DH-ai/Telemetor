@@ -16,8 +16,23 @@ file_path = 'D:/Obfuscation/telemetor/Backend/rocket.csv'
 if __name__ == '__main__':
   
     _list = parse_csv(file_path)
+
+
+
+
+
     _bF = [row for row in _list if row[0] == "b'F'"]
+    
+    for i in range(2,100):
+        print(float(_bF[i][1])-float(_bF[i-1][1]))
+    exit()
+    
+    
     _bS = [row for row in _list if row[0] == "b'S'"]
+
+
+
+
 
     head1= ["b'F'", ' time', ' state', ' temperature', ' alt', ' ram_diff', ' bno_x', ' bno_y', ' bno_z', ' high_x', ' high_y', ' high_z', ' gyro_x', ' gyro_y', ' gyro_z', '', '', '', '']
 
@@ -25,7 +40,7 @@ if __name__ == '__main__':
     # print(_bF[0])
     print(type(_bF))
 
-    df1 = pd.DataFrame(iter(_bF), columns=head1)
+    # df1 = pd.DataFrame(iter(_bF), columns=head1)
     print(df1)
     exit()
 
