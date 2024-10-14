@@ -18,7 +18,9 @@ import csv ## Might remove this later
     3. Shutting down the client connectin
     4. Logging of the error
     5. Authentication and Authorization Mechanism
-    6. 
+    6. Sendint the headers and types as a first step to setup the communication
+    7. Setting up the Real Time data stream or atleast as soon as data is available
+    8. Implementing the Serial Communication
 
 
 
@@ -92,6 +94,8 @@ class SocketServer:
             # client_socket.recv(1024)
             logging.info(f"Connection established with {address}")
             self.clients.append(client_socket)
+
+            ## Implmenting some sort of mechanism to close the connection
             client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
             client_thread.start()
 
@@ -209,9 +213,10 @@ def handle_buffer(bufferQueue):
         # else:
         logging.info("DATA: {}".format(data))
 
-if __name__ == "__main__":
-    bufferQueue = Queue()
-    t3 = threading.Thread(target=populate_csv, )
+
+def main(queue):
+    
+    t3 = threading.Thread(target=populate_csv)
     t3.start()
     # server = SocketServer()
     # server.start()
@@ -219,12 +224,27 @@ if __name__ == "__main__":
     rocket_laucnh = True
     
     if rocket_laucnh:
-        dataHandler = DataHandler(filePath=TEMPPATH,queue=bufferQueue)
-
+        dataHandler = DataHandler(filePath=TEMPPATH, queue=queue)
 
     ## sample thread for handling the buffer
     # temp = threading.Thread(target=handle_buffer, args=(bufferQueue,))
     # temp.start()
+
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    bufferQueue = Queue()
+    main(bufferQueue)
        
             
 

@@ -11,6 +11,10 @@
   - [x] Threading
   - [x] Sockets
   - [ ] Socket Server
+    -[ ] Acknowledgments Mechanism
+    -[ ] Realtime Data Flow
+    -[ ] Error Handling
+    -[ ] Implementing the Serial Communication thread
   - [ ] Parser Dart
   - [ ] Implementing Sockets in dart
   - [ ] Implementing the UI
