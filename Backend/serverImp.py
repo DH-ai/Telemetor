@@ -67,6 +67,14 @@ TEMPPATH = 'D:/Obfuscation/telemetor/Backend/csv-temp/data.csv'
 ROCKETLAUNCH = False
 
 
+class SerialComm:
+    def __init__(self, port:str, baudrate:int):
+        self.port = port
+        self.baudrate = baudrate
+        self.ser = serial.Serial(port, baudrate)
+        self.ser.flush()
+
+
 class SocketServer:
     def __init__(self, host="127.0.0.1", port=12345):
         self.host = host
@@ -115,14 +123,21 @@ class SocketServer:
         # 1. ACknoledgment of the connection
         # 2. Sharing of types and data
         # 3. Sending the Headers and types as a form of acknoledgment 
+        # 4. Resting mechanism, this might happen that maximum client are reached now the all client 
+        # connecetions are closed and now need to call the accept_clients again but the question is we are on 
+        # which thread and should we call it from the same thread or some mechanism to stop all threads or 
+        # other threads running (if they are) and runn accept_cleiens again as if the socketServer Entierly 
+        # restarted, might calling start works
 
 
         ACK_SUCCESS = False
-        retries = 0
+        retries = 0 ## 5 retries
         try:
             while not ACK_SUCCESS:
                 if retries > 4:
                     ACK_SUCCESS = False
+                    logging.error("Max Retries reached")
+                    logging.info("Closing the connection")
                     break
                 data = client_socket.recv(1024).decode('utf-8')
                 if data == "ACK-CONNECT":
@@ -150,7 +165,9 @@ class SocketServer:
                                 if self.dataHandler is  None:
                                     ACK_SUCCESS = False
                                     logging.info("Rocket Launch Not Started")
-
+                                    logging.info(f"ROCKETLAUNCH{ROCKETLAUNCH}") ## Remove Later debuging purpose code line
+                                    logging.info("Retrying......")
+                                
 
                         else:
                             logging.error("Connection Failed Data Stream not started")
@@ -189,9 +206,23 @@ class SocketServer:
                     
 
     def sending_data(self, client_socket):
+        ## Sending the data to the client
+        """
+        1. Error handling
+        2. Timeout handling
+        3. Retries for below mentioned case
+        4. local buffer to store the sent data to stop packet loss in case data is not 
+        5. Acknowledgment of the data sent (need to see if not profucing overheads)
+        5. Logging the data sent (probably or but somethign else type of logging)
+        6. Implementing the real time data stream (SORT OF)
+        7. Implementing the Serial Communication
 
+
+        
+        
+        """
         pass
-    
+# 
     
     def get_data():
         data  = bufferQueue.get()
@@ -202,6 +233,7 @@ class SocketServer:
         for client in self.clients:
             client.close()
         self.server_socket.close()
+
 
 ## Will handle Serial Communitcatino in future
 class DataHandler():
