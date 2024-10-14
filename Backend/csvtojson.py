@@ -17,7 +17,7 @@ class Header:
         
 file_path = "D:/Obfuscation/telemetor/Backend/csv-temp/data.csv"
 ## Main csv to json converter class 
-class CsvToJson:
+class  CsvToJson:
     def __init__(self, file_path=None,data:Union[dict,list]=None):
         assert (data is not None and file_path is  None) or (data is  None and file_path is not None), "Either data or file_path must be provided, but not both."
         self.file_path = file_path
@@ -41,7 +41,7 @@ class CsvToJson:
     def currentindex(self, value):
         raise Exception("Can't set current index")
     
-    def readCsv(self,header:bool=False,headerrows:int=2)-> None:
+    def readCsv(self,header:bool=True,headerrows:int=2)-> None:
         
         try:
             if self.file_path is None and self.data is not None :

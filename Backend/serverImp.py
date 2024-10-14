@@ -58,7 +58,7 @@ class SocketServer:
         accept_thread = threading.Thread(target=self.accept_clients)
         accept_thread.start()
 
-
+    
 
 
     def accept_clients(self):
@@ -106,9 +106,9 @@ class SocketServer:
 ## Will handle Serial Communitcatino in future
 class DataHandler():
     
-    def __init__(self, file_path=None,ser:serial.Serial=None,Queue:Queue=None):
-        assert file_path or ser, "Either file_path or serial port must be provided"
-        assert not (file_path and ser), "Only one of file_path or serial port must be provided"
+    def __init__(self, filePath=None,ser:serial.Serial=None,queue:Queue=None):
+        assert filePath or ser, "Either file_path or serial port must be provided"
+        assert not (filePath and ser), "Only one of file_path or serial port must be provided"
         
         # Serial Logic to be implmented
         #
@@ -117,10 +117,12 @@ class DataHandler():
 
 
 
-        self.file_path = file_path
+        self.file_path = filePath
+        self.header = []
         self.data = []
-        if Queue not None:
-            self.data_queue = Queue
+        self.state=[]
+        if queue is not None:
+            self.data_queue = queue
         else: 
             self.data_queue = Queue()
         self.data_thread = threading.Thread(target=self.parser_csv)
@@ -130,15 +132,42 @@ class DataHandler():
 
 
     def parser_csv(self):
-        csv_obj = CsvToJson(filePath)
-        csv_obj.convert()
+        csv_obj = CsvToJson(self.file_path)
+        csv_obj.readCsv(header=True,headerrows=2)
+        self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
+        self.state = csv_obj.header.types # b'F' or b'S'
+        ## data logic to be implemented
 
-        
+    def process_complete(self):
+        ## this method will be called when the rocket laucnch is completed or data stream is stoped 
+        ## ideal time need to be decide
+        pass
+
+
+    
+
+     ### We might only call bufferQueue.get() to get the data in the server thread
+    # def get_data(self):
+    #     return self.data_queue.get()
 
 if __name__ == "__main__":
-    server = SocketServer()
-    server.start()
-    dataHandler = DataHandler()
-    t3 = threading.Thread(target=populate_csv, args=(None))
-    t3.start()
+    # server = SocketServer()
+    # server.start()
+    bufferQueue = Queue()
+
+    rocket_laucnh = True
+    logging.info("Initiating Rocket Launch")
+    logging.info
+    
+    if rocket_laucnh:
+        dataHandler = DataHandler(filePath=FILEPATH,queue=bufferQueue)
+
+    logging.basicConfig(
+        stream=sys.stdout, 
+        level=logging.INFO, 
+        format='%(asctime)s - %(message)s',
+        datefmt='%H:%M:%S'
+    )
+    # t3 = threading.Thread(target=populate_csv, )
+    # t3.start()
 
