@@ -11,6 +11,20 @@ import serial
 import csv ## Might remove this later
 
 
+## TO DO
+"""
+    1. Implement Timeouts perfectly 
+    2. Retries mechanism
+    3. Shutting down the client connectin
+    4. Logging of the error
+    5. Authentication and Authorization Mechanism
+    6. 
+
+
+
+"""
+
+
 
 logging.basicConfig(
     stream=sys.stdout, 
@@ -55,7 +69,7 @@ class SocketServer:
         self.host = host
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.clients = []
+        self.clients = [] ## maxing it to 2 to 3 for now 
     
     def start(self):
         self.server_socket.bind((self.host, self.port))
@@ -71,12 +85,13 @@ class SocketServer:
 
     def accept_clients(self):
         while True:
+            if len(self.clients) >= 3:
+                logging.info("Max clients reached")
+                break
             client_socket, address = self.server_socket.accept()
             # client_socket.recv(1024)
             logging.info(f"Connection established with {address}")
             self.clients.append(client_socket)
-            
-            
             client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
             client_thread.start()
 
@@ -85,12 +100,16 @@ class SocketServer:
 
 
     def handle_client(self, client_socket):
+
+
         while True:
             try:
-                data = client_socket.recv(1024)
-                if not data:
-                    break
-                logging.info(f"Received: {data.decode('utf-8')}")
+                ## Acknoledgment Sequence to be implemented 
+                # 1. ACknoledgment of the connection
+                # 2. Sharing of types and data
+                # 3. Sending the Headers and types as a form of acknoledgment 
+
+                
                 
                 
                 client_socket.send("ACK".encode('utf-8'))
@@ -146,6 +165,8 @@ class DataHandler():
         try:
             self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
             self.state = csv_obj.header.types # b'F' or b'S'
+
+
         except Exception as e:
             logging.error("There is some error in reading the header")
 
@@ -200,8 +221,10 @@ if __name__ == "__main__":
     if rocket_laucnh:
         dataHandler = DataHandler(filePath=TEMPPATH,queue=bufferQueue)
 
-    temp = threading.Thread(target=handle_buffer, args=(bufferQueue,))
-    temp.start()
+
+    ## sample thread for handling the buffer
+    # temp = threading.Thread(target=handle_buffer, args=(bufferQueue,))
+    # temp.start()
        
             
 
