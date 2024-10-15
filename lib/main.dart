@@ -276,9 +276,3 @@ class CsvHandler {
   //   await file.writeAsString(csv, mode: FileMode.append);
   // }
 }
-
-
-
-
-
-
