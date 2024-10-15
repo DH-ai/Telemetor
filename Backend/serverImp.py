@@ -217,10 +217,17 @@ class SocketServer:
         6. Implementing the real time data stream (SORT OF)
         7. Implementing the Serial Communication
 
-
-        
-        
         """
+        self.dataHandler.data_thread.start() ##3 this will start the thread which is start populating the queue
+        while True: 
+            try:
+                data = bufferQueue.get()
+                if data != []: 
+                    client_socket.send(data.encode('utf-8'))
+                    logging.info("Data Sent")
+            except Exception as e:
+                logging.error("Unable to send data due to {}".format(e))
+                break
         pass
 # 
     
@@ -323,6 +330,7 @@ def main(queue):
     # server.start()
     logging.info("Initiating Rocket Launch")
     ROCKETLAUNCH = True
+
     
     
 
