@@ -220,7 +220,7 @@ class SocketServer:
         1. Error handling
         2. Timeout handling
         3. Retries for below mentioned case
-        4. local buffer to store the sent data to stop packet loss in case data is not 
+        4. local buffer to store the sent data to stop packet loss in case data is not  ## already a thing in tcp
         5. Acknowledgment of the data sent (need to see if not profucing overheads)
         5. Logging the data sent (probably or but somethign else type of logging)
         6. Implementing the real time data stream (SORT OF)
@@ -241,8 +241,8 @@ class SocketServer:
             logging.error("Rocket Launch not started")
             return
         client_socket.settimeout(5)
-
-        while ROCKETLAUNCH: 
+        retries = 0
+        while ROCKETLAUNCH and retries < 5: 
             try:
                 logging.info("Sending data to {}".format(client_socket.getpeername()))
                 data = bufferQueue.get() ## string bascially json data
@@ -260,15 +260,27 @@ class SocketServer:
                     except socket.timeout as e:
                         logging.error(f"Timeout Occured for client {client_socket.getpeername()}")
                         logging.info("Retrying......")
-                        time.sleep(2)
+                        retires += 1
+                        time.sleep(1)
                     except Exception as e:
                         logging.error("Some Error Occured")
                         logging.info("Retrying......")
-                        time.sleep(2)
-                        
+                        retires += 1
 
+                        time.sleep(1)
+                        
+            except socket.timeout as e:
+                logging.error(f"Timeout Occured for client {client_socket.getpeername()}")
+                logging.info("Retrying......")
+                retires += 1
+
+                time.sleep(1)
             except Exception as e:
                 logging.error("Unable to send data due to {}".format(e)) ## need to change the error message
+                logging.info("Retrying......")
+                retires += 1
+
+                time.sleep(1)
 
              
      
