@@ -21,6 +21,7 @@ import csv ## Might remove this later
     6. Sendint the headers and types as a first step to setup the communication
     7. Setting up the Real Time data stream or atleast as soon as data is available
     8. Implementing the Serial Communication
+    9. Thread for checking the status or logging importatn info 
 
 
 
@@ -85,9 +86,10 @@ class SocketServer:
         if ROCKETLAUNCH:
             self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue)
     
-    def start(self):
+    def start(self,timeout=8):
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(2)
+        self.server_socket.settimeout(timeout)
         logging.info(f"Server is listening on {self.host}:{self.port}")
         
         
@@ -115,7 +117,7 @@ class SocketServer:
 
 
 
-    def handle_client(self, client_socket,address):
+    def handle_client(self, client_socket:socket.socket,address):
 
 
 
@@ -129,10 +131,16 @@ class SocketServer:
         # other threads running (if they are) and runn accept_cleiens again as if the socketServer Entierly 
         # restarted, might calling start works
 
+        ## time out need to implment
+
 
         ACK_SUCCESS = False
         retries = 0 ## 5 retries
         try:
+            client_socket.send("ACK-CONNECT".encode('utf-8'))
+            client_socket.timeout = 5
+            csvobj = CsvToJson(FILEPATH)
+
             while not ACK_SUCCESS:
                 if retries > 4:
                     ACK_SUCCESS = False
@@ -141,6 +149,7 @@ class SocketServer:
                     break
                 data = client_socket.recv(1024).decode('utf-8')
                 if data == "ACK-CONNECT":
+                    
                     logging.info("Client Connected")
                     client_socket.send("ACK-EXCHANGE".encode('utf-8'))
                     data = client_socket.recv(1024).decode('utf-8')
@@ -205,7 +214,7 @@ class SocketServer:
 
                     
 
-    def sending_data(self, client_socket):
+    def sending_data(self, client_socket:socket.socket):
         ## Sending the data to the client
         """
         1. Error handling
@@ -217,20 +226,52 @@ class SocketServer:
         6. Implementing the real time data stream (SORT OF)
         7. Implementing the Serial Communication
 
+        data sent
+        data received
+        waiting for the ack 
+        ack received custom ack
+        sending the ack back 
+        if ack received pop the value from the tempBuffer
+        send again the packet but packets are from the tempBuffer
         """
-        self.dataHandler.data_thread.start() ##3 this will start the thread which is start populating the queue
-        while True: 
+
+        # self.dataHandler.data_thread.start() ##3 this will start the thread which is start populating the queue
+        acknum=0
+        if not ROCKETLAUNCH:
+            logging.error("Rocket Launch not started")
+            return
+        client_socket.settimeout(5)
+
+        while ROCKETLAUNCH: 
             try:
-                data = bufferQueue.get()
+                logging.info("Sending data to {}".format(client_socket.getpeername()))
+                data = bufferQueue.get() ## string bascially json data
                 if data is not None: 
                     #  try lock 
-                    client_socket.send(data.encode('utf-8'))
+                    client_socket.send(f"{data}::ACK({acknum})" .encode('utf-8'))
                     logging.info("Data Sent")
+                    logging.info("Wating for the ACK")
+                    try:
+                        
+                        temp = client_socket.receive(1024).decode('utf-8')
+                        if temp == f"ACK({acknum})":
+                            logging.info("ACK Received")
+                            acknum += 1
+                    except socket.timeout as e:
+                        logging.error(f"Timeout Occured for client {client_socket.getpeername()}")
+                        logging.info("Retrying......")
+                        time.sleep(2)
+                    except Exception as e:
+                        logging.error("Some Error Occured")
+                        logging.info("Retrying......")
+                        time.sleep(2)
+                        
+
             except Exception as e:
                 logging.error("Unable to send data due to {}".format(e)) ## need to change the error message
 
-                break
-        pass
+             
+     
 # 
     
     def get_data():
@@ -286,7 +327,7 @@ class DataHandler():
 
         try:
             while True:
-                data = csv_obj.packet()
+                data = csv_obj.packet() ## json data 
                 if data !=[]:
                     self.data_queue.put(data)
                 time.sleep(SAMAPLINGTIME)
@@ -355,7 +396,7 @@ def main(queue):
 if __name__ == "__main__":
     bufferQueue = Queue()
     # main(bufferQueue)
-    
+
     print(("ds".encode('utf-8')))  
      
             
