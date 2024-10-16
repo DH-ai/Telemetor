@@ -222,11 +222,13 @@ class SocketServer:
         while True: 
             try:
                 data = bufferQueue.get()
-                if data != []: 
+                if data is not None: 
+                    #  try lock 
                     client_socket.send(data.encode('utf-8'))
                     logging.info("Data Sent")
             except Exception as e:
-                logging.error("Unable to send data due to {}".format(e))
+                logging.error("Unable to send data due to {}".format(e)) ## need to change the error message
+
                 break
         pass
 # 
@@ -353,8 +355,8 @@ def main(queue):
 if __name__ == "__main__":
     bufferQueue = Queue()
     # main(bufferQueue)
-    num:bytes = b'\0x00'
-    print(len(num))  
+    
+    print(("ds".encode('utf-8')))  
      
             
 
