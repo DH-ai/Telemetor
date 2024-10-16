@@ -93,7 +93,7 @@ class SocketServer:
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(2)
         self.server_socket.settimeout(timeout)
-        temp_thread_to_print_time = threading.Thread(target=self.print_time,)
+        # temp_thread_to_print_time = threading.Thread(target=self.print_time,)
         # temp_thread_to_print_time.start()
         logging.info(f"Server is listening on {self.host}:{self.port}")
         
@@ -344,7 +344,7 @@ class DataHandler():
             self.data_queue = queue
         else: 
             self.data_queue = Queue()
-        self.data_thread = threading.Thread(target=self.parser_csv)
+        self.data_thread = threading.Thread(target=self.parser_csv,daemon=False)
         self.data_thread.start()
 
 
@@ -405,11 +405,13 @@ def handle_buffer(bufferQueue):
 def main(queue):
     ROCKETLAUNCH = True
     
-    t3 = threading.Thread(target=populate_csv)
+    t3 = threading.Thread(target=populate_csv,daemon=False)
+
     t3.start()
     server = SocketServer()
     server.start()
     logging.info("Initiating Rocket Launch")
+            
 
     
     

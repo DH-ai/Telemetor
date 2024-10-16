@@ -13,14 +13,9 @@ while True:
         if not connected:
             sock.connect(('localhost', 12345))
             connected = True
-
-        while connected:
             sock.send(b'Hello, world')
-            # data = sock.recv(1024)
+            break
 
-            # print(data.decode("utf-8"))
-            time.sleep(1)
-            print("dsahhdfgjhghjfdsghjdfsjghgjhsdfgjhsdfghj")
             
 
     except:
@@ -28,7 +23,13 @@ while True:
         print("Trying again")
         connection = False
         
+while True:
+    try:
+        data = sock.recv(1024)
+        print(data.decode())
+        time.sleep(1)
+    except Exception as e: 
 
-
-
-print("Closing connection")
+        
+        print("Closing connection", e)
+        break
