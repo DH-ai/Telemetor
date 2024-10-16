@@ -22,6 +22,8 @@ import csv ## Might remove this later
     7. Setting up the Real Time data stream or atleast as soon as data is available
     8. Implementing the Serial Communication
     9. Thread for checking the status or logging importatn info 
+    10. signaling for handling exiting process
+    11. using thread-safe stop mechanism
 
 
 
@@ -53,7 +55,7 @@ def populate_csv():
             for i in range(1, num):
                 writer.writerow([random.randint(1,100) for j in range(5)])
 
-            logging.info("Appended {} rows to the csv".format(num-1))
+            # logging.info("Appended {} rows to the csv".format(num-1))
 
 
 
@@ -83,35 +85,58 @@ class SocketServer:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.clients = [] ## maxing it to 2  for now 
         self.dataHandler:DataHandler = None
+        self.connectionflag = False
         if ROCKETLAUNCH:
             self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue)
     
-    def start(self,timeout=8):
+    def start(self,timeout=None):
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(2)
         self.server_socket.settimeout(timeout)
+        temp_thread_to_print_time = threading.Thread(target=self.print_time,)
+        # temp_thread_to_print_time.start()
         logging.info(f"Server is listening on {self.host}:{self.port}")
         
         
         accept_thread = threading.Thread(target=self.accept_clients)
         accept_thread.start()
 
-    
+    ## will edit it or remove it later
+    def print_time(self):
+        t=1
+        while True:
+            
+            logging.info("Time: {}".format(t))
+            time.sleep(1)
+            t+=1
 
-
+    ## error manegment of this function
+    ## need to implement the timeout mechanism  
+    ## Reseting 
+    ## a method as a security to check if clients are still connected or not
     def accept_clients(self):
         while True:
-            if len(self.clients) >= 2:
+            if len(self.clients) >= 5:
                 logging.info("Max clients reached")
                 break
-            client_socket, address = self.server_socket.accept()
-            client_socket.recv(1024)
-            logging.info(f"Connection established with {address}")
-            self.clients.append(client_socket)
+            try:
+                client_socket, address = self.server_socket.accept()
+                logging.info(f"Connection established with {address}")
+                # logging.info(client_socket.recv(1024).decode("utf-8")) ## danger of blocking the thread 
+                self.clients.append(client_socket)
 
-            ## Implmenting some sort of mechanism to close the connection
-            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,address))
-            client_thread.start()
+                ## Implmenting some sort of mechanism to close the connection
+                # try:
+                        
+                client_thread = threading.Thread(target=self.handle_client, args=(client_socket,address))
+                client_thread.start()
+            except RuntimeError as e:
+                logging.error(f"Unable to start the thread due to {e}")
+                logging.info("Closing the connection")
+                client_socket.close()
+                self.clients.remove(client_socket)
+                continue
+            
 
 
 
@@ -263,7 +288,7 @@ class SocketServer:
                         retires += 1
                         time.sleep(1)
                     except Exception as e:
-                        logging.error("Some Error Occured")
+                        logging.error("Some Error Occured in Acknoledgments due to {}".format(e))
                         logging.info("Retrying......")
                         retires += 1
 
@@ -285,7 +310,7 @@ class SocketServer:
              
      
 # 
-    
+    ## redifine the purpose of this function 
     def get_data():
         data  = bufferQueue.get()
 
@@ -378,13 +403,13 @@ def handle_buffer(bufferQueue):
 
 
 def main(queue):
+    ROCKETLAUNCH = True
     
     t3 = threading.Thread(target=populate_csv)
     t3.start()
-    # server = SocketServer()
-    # server.start()
+    server = SocketServer()
+    server.start()
     logging.info("Initiating Rocket Launch")
-    ROCKETLAUNCH = True
 
     
     
@@ -398,6 +423,7 @@ def main(queue):
 
 
 
+## after time out resart socket server
 
 
 
@@ -407,9 +433,10 @@ def main(queue):
 
 if __name__ == "__main__":
     bufferQueue = Queue()
-    # main(bufferQueue)
-
-    print(("ds".encode('utf-8')))  
+    main(bufferQueue)
+    
+# 
+    # print(("ds".encode('utf-8')))  
      
             
 
