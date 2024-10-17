@@ -30,6 +30,10 @@ import csv ## Might remove this later
 
 """
 
+## ISUEES
+"""
+    1. Is parsing function keep adding things to the queue if multiple clients are connected then one client will epmty the queue and other will not get the same data so there will be data inconsistency
+"""
 
 
 logging.basicConfig(
