@@ -8,6 +8,7 @@ import sys
 import os
 from queue import Queue
 import serial
+import signal
 import csv ## Might remove this later
 
 
@@ -86,6 +87,7 @@ class SocketServer:
         self.clients = [] ## maxing it to 2  for now 
         self.dataHandler:DataHandler = None
         self.connectionflag = False
+        logging.info(f"ROCKETLAUNCH STATUS{ROCKETLAUNCH}")
         if ROCKETLAUNCH:
             self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue)
     
@@ -100,6 +102,8 @@ class SocketServer:
         
         accept_thread = threading.Thread(target=self.accept_clients)
         accept_thread.start()
+        # accept_thread.join()
+        print("SOME SHITTY STUFFFFFFF IT SHOULD NOT BE PRINT IF IM RIGHT")
 
     ## will edit it or remove it later
     def print_time(self):
@@ -116,7 +120,7 @@ class SocketServer:
     ## a method as a security to check if clients are still connected or not
     def accept_clients(self):
         while True:
-            if len(self.clients) >= 5:
+            if len(self.clients) >3:
                 logging.info("Max clients reached")
                 break
             try:
@@ -158,12 +162,12 @@ class SocketServer:
 
         ## time out need to implment
 
-
+        logging.info("Handling the client")
         ACK_SUCCESS = False
         retries = 0 ## 5 retries
         try:
             client_socket.send("ACK-CONNECT".encode('utf-8'))
-            client_socket.timeout = 5
+            # client_socket.timeout = 5
             csvobj = CsvToJson(FILEPATH)
 
             while not ACK_SUCCESS:
@@ -212,25 +216,24 @@ class SocketServer:
                         logging.info("Retrying......")
                         ACK_SUCCESS = False
                 else:
-                    logging.error("Connection Failed")
+                    logging.error("Acknoledgment Failed client send d-{}".format(data)) 
                     logging.info("Retrying......")
                     ACK_SUCCESS = False
 
                 retries += 1
 
         except Exception as e: ## not sure about error 
+            logging.error(f"Unable to establish connection to the client {address} due to {e}") 
 
             # Logging the error
             #   
 
-            pass
         finally:
             if not ACK_SUCCESS:
                 client_socket.close()
                 self.clients.remove(client_socket)
         
 
-        logging.error(f"Unable to establish connection to the client {address}") 
 
             
             
@@ -269,31 +272,37 @@ class SocketServer:
         retries = 0
         while ROCKETLAUNCH and retries < 5: 
             try:
-                logging.info("Sending data to {}".format(client_socket.getpeername()))
                 data = bufferQueue.get() ## string bascially json data
-                if data is not None: 
+                
+                
+                if data !="[]": 
                     #  try lock 
-                    client_socket.send(f"{data}::ACK({acknum})" .encode('utf-8'))
+                    logging.info("Sending data to {}".format(client_socket.getpeername()))
+                    client_socket.send(f"{data}::ACK({acknum})".encode('utf-8'))
                     logging.info("Data Sent")
                     logging.info("Wating for the ACK")
                     try:
                         
-                        temp = client_socket.receive(1024).decode('utf-8')
-                        if temp == f"ACK({acknum})":
+                        temp = client_socket.recv(1024).decode('utf-8')
+                        if temp == f"::ACK({acknum})":
                             logging.info("ACK Received")
                             acknum += 1
+                        else:
+                            logging.info("ACK not received")
+
+                            ### sending data logic is also left as of now
                     except socket.timeout as e:
                         logging.error(f"Timeout Occured for client {client_socket.getpeername()}")
                         logging.info("Retrying......")
-                        retires += 1
+                        retries += 1
                         time.sleep(1)
                     except Exception as e:
                         logging.error("Some Error Occured in Acknoledgments due to {}".format(e))
                         logging.info("Retrying......")
-                        retires += 1
+                        retries += 1
 
                         time.sleep(1)
-                        
+
             except socket.timeout as e:
                 logging.error(f"Timeout Occured for client {client_socket.getpeername()}")
                 logging.info("Retrying......")
@@ -315,7 +324,7 @@ class SocketServer:
         data  = bufferQueue.get()
 
         pass
-
+    ## work on this function for proper exit sequence 
     def stop(self):
         for client in self.clients:
             client.close()
@@ -349,10 +358,10 @@ class DataHandler():
 
 
 
-
+    ## retru mechanism might be needed here or maybe better error manegment
     def parser_csv(self):
         csv_obj = CsvToJson(self.file_path)
-        csv_obj.readCsv(header=True,headerrows=2)
+        csv_obj.readCsv(header=True,headerrows=1)
 
         try:
             self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
@@ -360,7 +369,7 @@ class DataHandler():
 
 
         except Exception as e:
-            logging.error("There is some error in reading the header")
+            logging.error("There is some error in reading the header parser_csv {}".format(e))
 
         try:
             while True:
@@ -369,7 +378,7 @@ class DataHandler():
                     self.data_queue.put(data)
                 time.sleep(SAMAPLINGTIME)
         except Exception as e:
-            logging.error("There is some error ")
+            logging.error("There is some error parser_csv {}".format(e))
             
         finally:
             self.process_complete()
@@ -403,18 +412,21 @@ def handle_buffer(bufferQueue):
 
 
 def main(queue):
-    ROCKETLAUNCH = True
+    global ROCKETLAUNCH 
+    ROCKETLAUNCH= True
     
     t3 = threading.Thread(target=populate_csv,daemon=False)
 
     t3.start()
+    
     server = SocketServer()
     server.start()
-    logging.info("Initiating Rocket Launch")
+    t3.join()
+    
             
 
     
-    
+
 
     ## sample thread for handling the buffer
     # temp = threading.Thread(target=handle_buffer, args=(bufferQueue,))

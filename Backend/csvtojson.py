@@ -3,16 +3,28 @@ import csv
 import json
 import errno
 import time
+import logging
 from typing import Union
+
+
+## changing all print statements to logging.error() and logging.info() statements
+
+
+
 class Header:
     def __init__  (self, *args):
-        self.headers = []
-        self.types = [item[0] for item in args]
-        for item in args:
-            self.headers = self.headers + item
-        for item in self.types:
+        try:
+            self.headers = []
+            self.types = [item[0] for item in args]
+            for item in args:
+                self.headers = self.headers + item
+            for item in self.types:
 
-            self.headers.remove(item)
+                self.headers.remove(item)
+        except Exception as e:
+            logging.error("An error occured while creating header",e)
+        finally:
+            logging.info("Header created Headers{} Types{}".format(self.headers,self.types))
         
         
 file_path = "D:/Obfuscation/telemetor/Backend/csv-temp/data.csv"
@@ -53,7 +65,11 @@ class  CsvToJson:
                 self.data =data
                 if header:
                     print("reading header")
-                    self.header = Header(*[self.data[header] for header in range(0,headerrows)])
+                    try:
+                        headers = [data[header] for header in range(0,headerrows)]
+                        self.header = Header(* headers)
+                    except Exception as e:
+                        logging.error("An error occured while reading header",e)
                     
         except TypeError as e:
             
