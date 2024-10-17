@@ -11,12 +11,12 @@
   - [x] Threading
   - [x] Sockets
   - [ ] Socket Server
-    -[ ] Acknowledgments Mechanism
-    -[ ] Realtime Data Flow
+    -[x] Acknowledgments Mechanism
+    -[x] Realtime Data Flow
     -[ ] Error Handling
     -[ ] Implementing the Serial Communication thread
-  - [ ] Parser Dart
   - [ ] Implementing Sockets in dart
+  - [ ] Parser Dart
   - [ ] Implementing the UI
 - [ ] Wokring on the testing and deployment
-- [ ] 2024-10-15: Finished the project
+- [ ] 2024-10-20: Finished the project
