@@ -1,21 +1,46 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 
-void main() async {
-  // Connect to the server
-  final socket = await Socket.connect('localhost', 12345);
-  print('Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
 
-  // Send data to the server
-  socket.writeln('Hello, Server!');
+void connectToServer()async{
+  Socket socket = await Socket.connect('localhost', 12345);
+  print('Connected to server');
+  var ACKSTATUS = false;
 
-  // Listen for responses from the server
-  socket.listen(
-    (data) {
-      print('Server: ${String.fromCharCodes(data).trim()}');
-    },
-    onDone: () {
-      print('Server closed the connection');
-      socket.destroy();
-    },
-  );
+
+
+  socket.listen((List<int> event) {
+    var data = utf8.decode(event);
+    switch(data){
+      case 'ACK-CONNECT':
+        socket.write('ACK-CONNECT');
+        break;
+      case 'ACK-EXCHANGE':
+        socket.write('ACK-EXCHANGE');
+        break;
+      default:
+        print('Server: $data');
+        ACKSTATUS = true;
+        break;
+
+    }
+    if (ACKSTATUS){
+      socket.write('ACK-COMPLETE');
+    }
+
+  });
+
+
+
+}
+
+
+void main(){
+
+  connectToServer();
+
+
+
+
 }

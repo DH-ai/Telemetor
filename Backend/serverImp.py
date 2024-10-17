@@ -270,6 +270,8 @@ class SocketServer:
 
         # self.dataHandler.data_thread.start() ##3 this will start the thread which is start populating the queue
         acknum=0
+
+        ## if not recived the ack resend that witought updating anythng
         if not ROCKETLAUNCH:
             logging.error("Rocket Launch not started")
             return
