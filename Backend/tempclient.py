@@ -4,7 +4,7 @@ import threading
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-
+import json 
 
 connected = False
 
@@ -28,7 +28,7 @@ def handleConnection(sock:socket.socket):
                     sock.send("ACK-COMPLETE".encode("utf-8"))
                     while True:
                         data = sock.recv(1024)
-                        print(data.decode("utf-8"))
+                        print(json.detect_encoding(data))
                         i=0
                         data = data.decode("utf-8")
                         for i in range(len(data)):

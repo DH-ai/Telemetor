@@ -25,6 +25,7 @@ import csv ## Might remove this later
     9. Thread for checking the status or logging importatn info 
     10. signaling for handling exiting process
     11. using thread-safe stop mechanism
+    12. Perfectly creating the data stream as json objects
 
 
 
@@ -58,7 +59,7 @@ def populate_csv():
             
             num = random.randint(1,10)
             for i in range(1, num):
-                writer.writerow([random.randint(1,100) for j in range(5)])
+                writer.writerow(['A',*[random.randint(1,100) for j in range(4)]])
 
             # logging.info("Appended {} rows to the csv".format(num-1))
 

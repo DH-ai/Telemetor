@@ -95,7 +95,7 @@ class  CsvToJson:
         else:
             print(list(item for item in self.header.headers))
 
-    def convertToJson(self,data,ident:int=None)-> str:
+    def convertToJson(self,data,ident:int= 4)-> str:
         jsonObj = {}
         jsonObj = json.dumps(data,indent=ident)
         return jsonObj
@@ -149,7 +149,7 @@ class  CsvToJson:
     def packet(self):
         dictNew=list()
         for i in range(self.__lastindex,len(self.data)):
-            dictNew.append( self.data[i])
+            dictNew.append(self.convertToJson( self.data[i]))
         self.__currentindex = len(self.data)-1
         self.__lastindex = self.__currentindex+1
         
