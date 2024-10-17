@@ -173,7 +173,7 @@ class SocketServer:
         try:
             client_socket.send("ACK-CONNECT".encode('utf-8'))
             # client_socket.timeout = 5
-            csvobj = CsvToJson(FILEPATH)
+            # csvobj = CsvToJson(FILEPATH)
 
             while not ACK_SUCCESS:
                 if retries > 4:
@@ -189,7 +189,7 @@ class SocketServer:
                     data = client_socket.recv(1024).decode('utf-8')
 
                     if data == "ACK-EXCHANGE":
-                        headers = "Headers{}:Types{}".format(self.dataHandler.header, self.dataHandler.state)
+                        headers = "HEADERS{}:TYPES{}".format(self.dataHandler.header, self.dataHandler.state)
                         client_socket.send(headers.encode('utf-8'))
                         data = client_socket.recv(1024).decode('utf-8')
 
