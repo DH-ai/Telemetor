@@ -156,10 +156,10 @@ class _AltitudeChartState extends State<AltitudeChart> {
   late List<List<dynamic>> _csvData;
   double _time =0;
   double _altitude=0;
-  double? y_min=0 ;
-  double? y_max=10 ;
-  double? x_min=0 ;
-  double? x_max=10 ;
+  double? y_min=-10 ;
+  double? y_max=100 ;
+  double? x_min=-100 ;
+  double? x_max=400 ;
 
 
   @override
@@ -175,7 +175,7 @@ class _AltitudeChartState extends State<AltitudeChart> {
     _startTimer();
   }
   void _startTimer() {
-    Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    Timer.periodic(const Duration(milliseconds: 1000), (timer) {
       setState(() {
 
         if(_currentIndex < _csvData.length){
@@ -223,6 +223,7 @@ class _AltitudeChartState extends State<AltitudeChart> {
             barWidth: 1,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
+
 
 
             // isStrokeCapRound: true,
