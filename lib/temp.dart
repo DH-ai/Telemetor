@@ -1,36 +1,47 @@
 import 'dart:io';
-import 'dart:async';
-// Future<String> fetchData() async {
-//   await Future.delayed(Duration(seconds: 1));
-//   return 'Data fetched!';
-// }
-//
-// void main() {
-//   fetchData().then((data) {
-//     print(data);
-//     return 'Processing complete!';
-//   }).then((message) {
-//     print("${message}sasa");
-//   }).catchError((error) {
-//     print('An error occurred: $error');
-//   });
-// }\
+import 'dart:typed_data';
 
-// Possible options we have
-// 1. Use a StreamController
+void main() async {
 
-void main() {
-  // Creating a stream controller
-  final controller = StreamController<String>();
+  // connect to the socket server
+  final socket = await Socket.connect('localhost', 4567);
+  print('Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
 
-  // Listening to the stream
-  controller.stream.listen((data) {
-    print('Received: $data');
-  });
+  // listen for responses from the server
+  socket.listen(
 
-  // Adding data to the stream
-  controller.add('Hello');
-  controller.add('World');
+    // handle data from the server
+        (Uint8List data) {
+      final serverResponse = String.fromCharCodes(data);
+      print('Server: $serverResponse');
+    },
 
-  controller.close(); // Close the stream to avoid memory leaks
+    // handle errors
+    onError: (error) {
+      print(error);
+      socket.destroy();
+    },
+
+    // handle server ending connection
+    onDone: () {
+      print('Server left.');
+      socket.destroy();
+    },
+  );
+
+  // send some messages to the server
+  await sendMessage(socket, 'Knock, knock.');
+  await sendMessage(socket, 'Banana');
+  await sendMessage(socket, 'Banana');
+  await sendMessage(socket, 'Banana');
+  await sendMessage(socket, 'Banana');
+  await sendMessage(socket, 'Banana');
+  await sendMessage(socket, 'Orange');
+  await sendMessage(socket, "Orange you glad I didn't say banana again?");
+}
+
+Future<void> sendMessage(Socket socket, String message) async {
+  print('Client: $message');
+  socket.write(message);
+  await Future.delayed(Duration(seconds: 2));
 }
