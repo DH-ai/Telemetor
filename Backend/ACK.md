@@ -8,7 +8,7 @@
 
 ## server will send 
 
-#### Client Recieve : `ACK-EXCHANGE `
+#### Client Recieve : `ACK-EXCHANGE`
 
 ## To start data exchange client will also send 
 
