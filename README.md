@@ -26,4 +26,4 @@
     - [ ] error handling and stuff
   - [ ] ROCKET LAUNCH SEQUENCE IN RPI
   - [ ] Working on the testing and deployment
-- [ ] 2024-10-20: Finished the project
+- [ ] 2024-10-28: Finished the project
