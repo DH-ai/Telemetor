@@ -1,6 +1,41 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+// regex""
+/*
+* \[([^}]*)\]
+*
+*void main() {
+  String text = "HEADERS{header1,header2,header3}:TYPES{type1,type2,type3}";
+
+  // Create a regular expression to match the pattern
+  RegExp regex = RegExp(r'HEADERS\{([^}]*)\}:TYPES\{([^}]*)\}');
+
+  // Use the firstMatch method to find matches
+  RegExpMatch? match = regex.firstMatch(text);
+
+  if (match != null) {
+    // Group 1 captures headers, Group 2 captures types
+    String headersPart = match.group(1)!;
+    String typesPart = match.group(2)!;
+
+    // Convert the comma-separated values into lists
+    List<String> headers = headersPart.split(',');
+    List<String> types = typesPart.split(',');
+
+    print("Headers: $headers");
+    print("Types: $types");
+  } else {
+    print("No match found.");
+  }
+}
+
+*
+*
+* */
+
+
+
 void main() async {
 
   // connect to the socket server
