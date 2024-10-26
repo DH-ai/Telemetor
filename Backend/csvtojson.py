@@ -149,7 +149,7 @@ class  CsvToJson:
     def packet(self):
         dictNew=list()
         for i in range(self.__lastindex,len(self.data)):
-            dictNew.append(self.data[i])
+            dictNew.append(  self.data[i])
         self.__currentindex = len(self.data)-1
         self.__lastindex = self.__currentindex+1
         

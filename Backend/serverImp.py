@@ -9,6 +9,7 @@ import os
 from queue import Queue
 import serial
 import signal
+import json
 import csv ## Might remove this later
 
 
@@ -286,6 +287,7 @@ class SocketServer:
                     #  try lock 
                     logging.info("Sending data to {}".format(client_socket.getpeername()))
                     client_socket.send(f"{data}::ACK({acknum})".encode('utf-8'))
+                    print(data)
                     logging.info("Data Sent")
                     logging.info("Wating for the ACK")
                     try:
@@ -382,7 +384,7 @@ class DataHandler():
             while True:
                 data = csv_obj.packet() ## json data 
                 if data !=[]:
-                    self.data_queue.put(data)
+                    self.data_queue.put(json.loads(data))
                 time.sleep(SAMAPLINGTIME)
         except Exception as e:
             logging.error("There is some error parser_csv {}".format(e))

@@ -11,9 +11,10 @@ void connectToServer()async{
 
 
   String res = 'choot mara';
-
+  var temp;
   socket.listen(
       (Uint8List data) {
+        temp = data;
         res = String.fromCharCodes(data);
 
         // print('Server: $res');
@@ -37,6 +38,7 @@ void connectToServer()async{
     }
     else{
       print('Server: $res');
+      print(temp);
       await Future.delayed(Duration(seconds: 2));
 
 
