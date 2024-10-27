@@ -57,7 +57,7 @@ class MyHomePage extends StatelessWidget {
       color: Theme.of(context).primaryColor,
       child: Scaffold(
 
-        appBar: AppBar(
+        appBar: AppBar( // Need to make a statefull appBar for status, packets and various information to be displayed
           centerTitle: true,
           title: Text(title),
         ),
@@ -91,55 +91,108 @@ class RowApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
 
-      children: [
-        Expanded(
-          // side bar
-          child: Container(
-            color: Theme.of(context).primaryColor,
-            margin: const EdgeInsets.all(10),
-          ),
-        ),
-        Expanded(
-            flex: 4,
-            child: Column(children: [
-              Expanded(
-                // top bar
-                child:  Container(
-                  // color: Colors.black,
-                  margin: const EdgeInsets.all(10),
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          // color: Colors.black,
-                          margin: const EdgeInsets.all(10),
-                          // padding: const EdgeInsets.all(20),
-                          child: const AltitudeChart(),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          // color: Colors.black,
-                          margin: const EdgeInsets.all(10),
-                          // padding: const EdgeInsets.all(20),
-                          child: const AltitudeChart(),
-                        ),
-                      ),
-                    ],
-                  ),
+     children:[
+       AspectRatio(
+         aspectRatio: 3 / 10,
+         child: Container(
+           color: Theme.of(context).primaryColor,
+           margin: const EdgeInsets.all(10),
+           child:AltitudeChart(),
+         ),
+       ),
 
-                ),
-              ),
-              Expanded(
-                // bottom bar
-                child: Container(
-                  color: Theme.of(context).primaryColor,
-                  margin: const EdgeInsets.all(10),
-                  child: const AltitudeChart(),
-                ),
-              ),
-            ]))
+
+     ]
+    );
+  }
+}
+
+class Dashboard extends StatelessWidget {
+  const Dashboard({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children:  <Widget>[
+         // AltitudeChart(),
+      ],
+    );
+  }
+}
+// this is our main screen where ALtitude , Temperature, Velocity, Accelerattion, Gyroscope Values as of now
+
+class CharMainScreen extends StatelessWidget {
+  const CharMainScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children:  <Widget>[
+        // AltitudeChart(),
+
+
+
+
+
+      ],
+    );
+  }
+}
+
+
+class Altitude extends StatelessWidget{
+  const Altitude({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children:  <Widget>[
+        // AltitudeChart(),
+      ],
+    );
+  }
+}
+
+class Temperature extends StatelessWidget {
+  const Temperature({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: <Widget>[
+        // TemperatureChart(),
+      ],
+    );
+  }
+}
+
+class Velocity extends StatelessWidget {
+  const Velocity({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: <Widget>[
+        // VelocityChart(),
+      ],
+    );
+  }
+}
+
+class Acceleration extends StatelessWidget {
+  const Acceleration({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: <Widget>[
+        // AccelerationChart(),
+      ],
+    );
+  }
+}
+
+class Gyroscope extends StatelessWidget {
+  const Gyroscope({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: <Widget>[
+        // GyroscopeChart(),
       ],
     );
   }
