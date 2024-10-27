@@ -10,6 +10,14 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:core';
 import 'package:csv/csv.dart';
+
+
+/*
+*Map for longitudnal and latitudnal Google Maps Api
+*
+*/
+
+
 void main() {
 
   runApp(const MyApp());
@@ -278,4 +286,4 @@ class CsvHandler {
   // }
 }
 
-class
+
