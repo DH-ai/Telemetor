@@ -183,16 +183,21 @@ class SocketServer:
                     logging.info("Closing the connection")
                     break
                 data = client_socket.recv(1024).decode('utf-8')
+                logging.info("client send {}".format(data))
                 if data == "ACK-CONNECT":
                     
                     logging.info("Client Connected")
                     client_socket.send("ACK-EXCHANGE".encode('utf-8'))
                     data = client_socket.recv(1024).decode('utf-8')
 
+                    logging.info("client send {}".format(data))
                     if data == "ACK-EXCHANGE":
+
                         headers = "HEADERS{}:TYPES{}".format(self.dataHandler.header, self.dataHandler.state)
                         client_socket.send(headers.encode('utf-8'))
                         data = client_socket.recv(1024).decode('utf-8')
+                        logging.info("client send {}".format(data))
+
 
                         if data == "ACK-COMPLETE":
                             ACK_SUCCESS = True

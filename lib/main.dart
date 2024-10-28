@@ -480,8 +480,8 @@ class Packets{
   * 2. Type
   * 3. Data
    */
-  late List<String> Headers;
-  late List<String> Types;
+  late List<String> headers;
+  late List<String> types;
   late String data;
   Packets({required this.data});
 
@@ -516,25 +516,39 @@ class NetworkHandler{
     if (data == 'ACK-CONNECT'){
       logger.i('Server: $data');
       await sendMessage(socket, 'ACK-CONNECT');
+      print("dsadsa");
       // Step 2: Wait for ACK-EXCHANGE
       final exchangeResponse = await _receiveData(socket);
       if (exchangeResponse=="ACK-EXCHANGE"){
         // logger.i('Server: $exchangeResponse');
         await sendMessage(socket, 'ACK-EXCHANGE');
-        final Headers = await _receiveData(socket);
-
-
-        packet = Packets(data: );
-
+        final res = await _receiveData(socket);
+        logger.i('Server: $res');
+        var temp = _processPacket(res);
+        logger.i('Server: $temp');
         await sendMessage(socket, 'ACK-COMPLETE');
+
+
+
+
+
+      }
+      else{
+          logger.i('Server: ${_receiveData(socket)} ');
       }
 
     }
     return socket;
   }
-
+  List<E> _processPacket<E>(String packet){
+    final regex = RegExp(r'HEADERS\{([^}]*)\}:TYPES\{([^}]*)\}');
+    final match = regex.firstMatch(packet);
+    final headers = match?.group(1);
+    final types = match?.group(2);
+    return [headers, types] as List<E>;
+  }
   Future<void> sendMessage(Socket socket, String message) async {
-    print('Client: $message');
+    logger.i('Sending: $message');
     socket.write(message);
     await Future.delayed(Duration(seconds: 2));
   }
@@ -551,4 +565,7 @@ class PacketHandler{
   * 3. methods for handling the packet data graceful
   * 4. error management
   * */
+  late List<String> header;
+  late List<String> type;
+  PacketHandler({required this.header, required this.type});
 }
