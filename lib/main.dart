@@ -509,18 +509,18 @@ class NetworkHandler{
     socket.listen(
           (Uint8List data) {
         res = String.fromCharCodes(data);
-        logger.i('Server: $res');
+
       },
     );
-    final data = await _receiveData(socket);
-    if (data == 'ACK-CONNECT'){
+    final data = res;
+    if (data == 'ACK-CONNECT') {
       logger.i('Server: $data');
+
       await sendMessage(socket, 'ACK-CONNECT');
-      print("dsadsa");
+
       // Step 2: Wait for ACK-EXCHANGE
-      final exchangeResponse = await _receiveData(socket);
-      if (exchangeResponse=="ACK-EXCHANGE"){
-        // logger.i('Server: $exchangeResponse');
+    }else if (data=="ACK-EXCHANGE"){
+        logger.i('Server: $data');
         await sendMessage(socket, 'ACK-EXCHANGE');
         final res = await _receiveData(socket);
         logger.i('Server: $res');
@@ -549,7 +549,7 @@ class NetworkHandler{
   }
   Future<void> sendMessage(Socket socket, String message) async {
     logger.i('Sending: $message');
-    socket.write(message);
+    socket.add(utf8.encode(message));
     await Future.delayed(Duration(seconds: 2));
   }
   Future<String> _receiveData(Socket serverSocket) async {
