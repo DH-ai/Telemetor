@@ -373,26 +373,32 @@ class CsvHandler {
 }
 
 class Packets{
-
+  /*
+  * 1. Header
+  * 2. Type
+  * 3. Data
+   */
 }
 class NetworkHandler{
   // Responsible for handling the network
   /*
   * 1.Establish and manage socket connections.
-  * 2. Add Incomping Packet to Buffer
+  * 2. Timeouts
   * 3. Error Handling
   * 4. Retry Mechanism
   * 5. ACK mechanism
+  * 6. Handling Incoming Outgoing data
+  * 7. Add Incoming Packet to Buffer
+  * 8. logging useful events
   *
   * */
 }
 class PacketHandler{
   // To-do
   /*
-  * 1. Recieve Packet
-  * 2. Parse Packet
-  * 3. Writting Meaning full data to csv
-  * 4. Respected charts read csv?
-  * 5. methods for handling the packet
+  * 1. Reading packet info from the buffer
+  * 2. For each packet create meaningful data
+  * 3. methods for handling the packet data gracefull
+  * 4. error manegment
   * */
 }
