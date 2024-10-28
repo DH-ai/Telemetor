@@ -378,6 +378,10 @@ class Packets{
   * 2. Type
   * 3. Data
    */
+  late List<String> Headers;
+  late List<String> Types;
+  Packets(this.Headers, this.Types);
+
 }
 class NetworkHandler{
   // Responsible for handling the network
@@ -398,7 +402,7 @@ class PacketHandler{
   /*
   * 1. Reading packet info from the buffer
   * 2. For each packet create meaningful data
-  * 3. methods for handling the packet data gracefull
-  * 4. error manegment
+  * 3. methods for handling the packet data graceful
+  * 4. error management
   * */
 }

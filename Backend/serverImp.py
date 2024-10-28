@@ -95,7 +95,7 @@ class SocketServer:
         self.connectionflag = False
         logging.info(f"ROCKETLAUNCH STATUS{ROCKETLAUNCH}")
         if ROCKETLAUNCH:
-            self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue)
+            self.dataHandler = DataHandler(filePath=FILEPATH, queue=bufferQueue)
     
     def start(self,timeout=None):
         self.server_socket.bind((self.host, self.port))
@@ -370,7 +370,7 @@ class DataHandler():
     ## retru mechanism might be needed here or maybe better error manegment
     def parser_csv(self):
         csv_obj = CsvToJson(self.file_path)
-        csv_obj.readCsv(header=True,headerrows=1)
+        csv_obj.readCsv(header=True,headerrows=2)
 
         try:
             self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
