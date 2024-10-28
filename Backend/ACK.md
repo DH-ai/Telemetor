@@ -1,12 +1,12 @@
 ## After Connecting Client Recieve
-`
-#### Client Recieve : `ACK-CONNECT
+
+#### Client Recieve : `ACK-CONNECT`
 
 ## Client will send
 
 #### Server Recieve : `ACK-CONNECT`
 
-## server will send 
+## server will send ACK-EXCHANGE
 
 #### Client Recieve : `ACK-EXCHANGE`
 

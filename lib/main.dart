@@ -482,7 +482,8 @@ class Packets{
    */
   late List<String> Headers;
   late List<String> Types;
-  Packets(this.Headers, this.Types);
+  late String data;
+  Packets({required this.data});
 
 }
 class NetworkHandler{
@@ -499,6 +500,8 @@ class NetworkHandler{
   *
   * */
   bool ackStatus = false;
+  late Packets packet ;
+
   Future<Socket> connectToServer()async {
     Socket socket = await Socket.connect('localhost', 12345);
     logger.i('Connected to server');
@@ -509,27 +512,21 @@ class NetworkHandler{
         logger.i('Server: $res');
       },
     );
-    while (true)  {
-      if (res == 'ACK-CONNECT'){
-        logger.i('Server: $res');
-
-        await sendMessage(socket, 'ACK-CONNECT');
-
-
-      }
-      else if (res=="ACK-EXCHANGE"){
-        logger.i('Server: $res');
+    final data = await _receiveData(socket);
+    if (data == 'ACK-CONNECT'){
+      logger.i('Server: $data');
+      await sendMessage(socket, 'ACK-CONNECT');
+      // Step 2: Wait for ACK-EXCHANGE
+      final exchangeResponse = await _receiveData(socket);
+      if (exchangeResponse=="ACK-EXCHANGE"){
+        // logger.i('Server: $exchangeResponse');
         await sendMessage(socket, 'ACK-EXCHANGE');
-        logger.i(res);
+        final Headers = await _receiveData(socket);
+
+
+        packet = Packets(data: );
+
         await sendMessage(socket, 'ACK-COMPLETE');
-
-      }
-      else{
-        logger.i('Server: $res');
-        await Future.delayed(Duration(seconds: 2));
-
-
-
       }
 
     }
@@ -540,6 +537,10 @@ class NetworkHandler{
     print('Client: $message');
     socket.write(message);
     await Future.delayed(Duration(seconds: 2));
+  }
+  Future<String> _receiveData(Socket serverSocket) async {
+    final response = await serverSocket.first;
+    return utf8.decode(response);
   }
 }
 class PacketHandler{
