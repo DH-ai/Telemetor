@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 // import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:io';
@@ -11,27 +12,18 @@ import 'dart:io';
 import 'dart:core';
 import 'package:csv/csv.dart';
 
-
 /*
 *Map for longitudnal and latitudnal Google Maps Api
 *
 */
 
-
 void main() {
-
   runApp(const MyApp());
-
-
 }
 
-
-
-
-
 class MyApp extends StatelessWidget {
-
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -48,6 +40,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatelessWidget {
   final String title;
+
   const MyHomePage({super.key, required this.title});
 
   @override
@@ -56,16 +49,16 @@ class MyHomePage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
       color: Theme.of(context).primaryColor,
       child: Scaffold(
-
-        appBar: AppBar( // Need to make a statefull appBar for status, packets and various information to be displayed
+        appBar: AppBar(
+          // Need to make a statefull appBar for status, packets and various information to be displayed
           centerTitle: true,
           title: Text(title),
         ),
         body: const Padding(
-    padding: EdgeInsets.fromLTRB(10,10,70,10),
-    child:  RowApp(),
+          padding: EdgeInsets.fromLTRB(10, 10, 70, 10),
+          child: RowApp(),
+        ),
       ),
-    ),
     );
   }
 
@@ -89,31 +82,44 @@ class RowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-
-     children:[
-       AspectRatio(
-         aspectRatio: 3 / 10,
-         child: Container(
-           color: Theme.of(context).primaryColor,
-           margin: const EdgeInsets.all(10),
-           child:AltitudeChart(),
-         ),
-       ),
-
-
-     ]
-    );
+    return Row(children: [
+      AspectRatio(
+        aspectRatio: 3 / 10,
+        child: Container(
+          color: Theme.of(context).primaryColor,
+          margin: const EdgeInsets.all(10),
+          child: Dashboard(),
+        ),
+      ),
+      Expanded(
+        child: Container(
+          color: Theme.of(context).primaryColor,
+          margin: const EdgeInsets.all(10),
+          child: Container(
+              margin: const EdgeInsets.all(10), child: CharMainScreen()),
+        ),
+      ),
+    ]);
   }
 }
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children:  <Widget>[
-         // AltitudeChart(),
+    return Column(
+      children: <Widget>[
+        // AltitudeChart(),
+        Expanded(
+          child: Container(
+            // height: 200,
+            width: 200,
+            child: const Text(
+                style: TextStyle(color: Color(0xFFc2255c)), 'Hello World'),
+            color: Colors.blue,
+          ),
+        ),
       ],
     );
   }
@@ -122,84 +128,113 @@ class Dashboard extends StatelessWidget {
 
 class CharMainScreen extends StatelessWidget {
   const CharMainScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children:  <Widget>[
-        // AltitudeChart(),
+    return  Expanded(
+        child: Column(children: <Widget>[
+      Expanded(
+        child: Row(
+          children: <Widget>[
+            Expanded(
 
-
-
-
-
-      ],
-    );
+              child: Container(
+                child: AspectRatio(aspectRatio: 16/15,child: Altitude(),) ,
+              ),
+            ),
+            Expanded(
+              child: Temperature(),
+            ),
+            Expanded(
+              child: Velocity(),
+            ),
+          ],
+        ),
+      ),
+      Expanded(
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Acceleration(),
+            ),
+            Expanded(
+              child: Gyroscope(),
+            ),
+          ],
+        ),
+      ),
+    ]));
   }
 }
 
-
-class Altitude extends StatelessWidget{
+class Altitude extends StatelessWidget {
   const Altitude({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children:  <Widget>[
-        // AltitudeChart(),
-      ],
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: AltitudeChart(),
+      // AccelerationChart(),
     );
   }
 }
 
 class Temperature extends StatelessWidget {
   const Temperature({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: <Widget>[
-        // TemperatureChart(),
-      ],
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: AltitudeChart(),
+      // AccelerationChart(),
     );
   }
 }
 
 class Velocity extends StatelessWidget {
   const Velocity({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: <Widget>[
-        // VelocityChart(),
-      ],
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: AltitudeChart(),
+      // AccelerationChart(),
     );
   }
 }
 
 class Acceleration extends StatelessWidget {
   const Acceleration({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: <Widget>[
-        // AccelerationChart(),
-      ],
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: AltitudeChart(),
+      // AccelerationChart(),
     );
   }
 }
 
 class Gyroscope extends StatelessWidget {
   const Gyroscope({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: <Widget>[
-        // GyroscopeChart(),
-      ],
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: AltitudeChart(),
+      // AccelerationChart(),
     );
   }
 }
 
 class AltitudeChart extends StatefulWidget {
   const AltitudeChart({super.key});
+
   @override
   State<AltitudeChart> createState() => _AltitudeChartState();
 }
@@ -207,21 +242,23 @@ class AltitudeChart extends StatefulWidget {
 class _AltitudeChartState extends State<AltitudeChart> {
   final List<FlSpot> _datapoints = [];
 
-
   final String filePath = 'D:/Obfuscation/telemetor/Backend/rocket.csv';
+
   // time coloumn
   // altitude column
   // final data = CsvHandler().readCsv(_AltitudeChartState().filePath);
-  int _currentIndex =2;
+  int _currentIndex = 2;
 
   late List<List<dynamic>> _csvData;
-  double _time =0;
-  double _altitude=0;
-  double? y_min=-10 ;
-  double? y_max=100 ;
-  double? x_min=-100 ;
-  double? x_max=400 ;
+  double _time = 0;
+  double _altitude = 0;
+  double? y_min = -10;
 
+  double? y_max = 3000;
+
+  double? x_min = 100;
+
+  double? x_max = 40000;
 
   @override
   void initState() {
@@ -230,32 +267,33 @@ class _AltitudeChartState extends State<AltitudeChart> {
 
     // _startTimer();
   }
-  Future<void> _loadData() async{
+
+  Future<void> _loadData() async {
     _csvData = await CsvHandler().readCsv(filePath);
 
     _startTimer();
   }
-  void _startTimer() {
-    Timer.periodic(const Duration(milliseconds: 1000), (timer) {
-      setState(() {
 
-        if(_currentIndex < _csvData.length){
-          if(_csvData[_currentIndex][0] == _csvData[1][0]){
+  void _startTimer() {
+    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      setState(() {
+        if (_currentIndex < _csvData.length) {
+          if (_csvData[_currentIndex][0] == _csvData[1][0]) {
             _currentIndex++;
-          }else {
-             // print("${timer.tick}  $_currentIndex ${_csvData[_currentIndex][4]}");
-            _time = double.parse(_csvData[_currentIndex][1].toString())-double.parse(_csvData[14][1].toString())+1;
+          } else {
+            // print("${timer.tick}  $_currentIndex ${_csvData[_currentIndex][4]}");
+            _time = double.parse(_csvData[_currentIndex][1].toString()) -
+                double.parse(_csvData[14][1].toString()) +
+                1;
             _altitude = double.parse(_csvData[_currentIndex][4].toString());
             y_max = max(y_max!, _altitude);
             y_min = min(y_min!, _altitude);
-            x_max = max(y_max!, _time);
-            x_min = min(y_min!, _time);
+            x_max = max(x_max!, _time);
+            x_min = min(x_min!, _time);
             _datapoints.add(FlSpot(_time, _altitude));
             _currentIndex++;
-
           }
-        }
-        else{
+        } else {
           timer.cancel();
         }
       });
@@ -285,20 +323,15 @@ class _AltitudeChartState extends State<AltitudeChart> {
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
 
-
-
             // isStrokeCapRound: true,
           ),
         ],
-
       ),
     );
   }
 }
 
 class CsvHandler {
-
-
   // Read CSV file and return List of Maps
   Future<List<List<dynamic>>> readCsv(String filePath) async {
     final input = File(filePath).openRead();
@@ -324,19 +357,42 @@ class CsvHandler {
     return fields;
   }
 
-  // Write data to CSV file
-  // Future<void> writeCsv(String filePath, List<List<dynamic>> data) async {
-  //   String csv = const ListToCsvConverter().convert(data);
-  //   final file = File(filePath);
-  //   await file.writeAsString(csv);
-  // }
+// Write data to CSV file
+// Future<void> writeCsv(String filePath, List<List<dynamic>> data) async {
+//   String csv = const ListToCsvConverter().convert(data);
+//   final file = File(filePath);
+//   await file.writeAsString(csv);
+// }
 
-  // Append data to an existing CSV file
-  // Future<void> appendCsv(String filePath, List<List<dynamic>> data) async {
-  //   String csv = const ListToCsvConverter().convert(data);
-  //   final file = File(filePath);
-  //   await file.writeAsString(csv, mode: FileMode.append);
-  // }
+// Append data to an existing CSV file
+// Future<void> appendCsv(String filePath, List<List<dynamic>> data) async {
+//   String csv = const ListToCsvConverter().convert(data);
+//   final file = File(filePath);
+//   await file.writeAsString(csv, mode: FileMode.append);
+// }
 }
 
+class Packets{
 
+}
+class NetworkHandler{
+  // Responsible for handling the network
+  /*
+  * 1.Establish and manage socket connections.
+  * 2. Add Incomping Packet to Buffer
+  * 3. Error Handling
+  * 4. Retry Mechanism
+  * 5. ACK mechanism
+  *
+  * */
+}
+class PacketHandler{
+  // To-do
+  /*
+  * 1. Recieve Packet
+  * 2. Parse Packet
+  * 3. Writting Meaning full data to csv
+  * 4. Respected charts read csv?
+  * 5. methods for handling the packet
+  * */
+}
