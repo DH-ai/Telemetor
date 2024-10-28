@@ -8,35 +8,72 @@ import 'csv_parser.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:ffi';
-import 'dart:io';
 import 'dart:core';
 import 'package:csv/csv.dart';
+import 'package:logger/logger.dart';
+import 'dart:typed_data'; // for Uint8List
 
 /*
 *Map for longitudnal and latitudnal Google Maps Api
 *
 */
+var logger =Logger() ;
 
 void main() {
   runApp(const MyApp());
+  var netobj=NetworkHandler();
+  netobj.connectToServer();
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Telemetor',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.dark,
-      ),
-      home: const MyHomePage(title: 'Telemetor'),
+    return Center(
+
+        child:ClipRect(
+
+          child: Container(
+            constraints: const BoxConstraints(
+              minWidth: 400, // Set your minimum width
+              minHeight: 600,
+
+            ),
+            child: const AppClass(),
+          ),
+        )
+
     );
   }
 }
+
+class AppClass extends StatelessWidget {
+  const AppClass({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home:LayoutBuilder(
+          builder: (context,constraints ) {
+            return Container(
+              constraints: const BoxConstraints(
+                minWidth: 400, // Set your minimum width
+                minHeight: 600, // Set your minimum height
+              ),
+              child: const MyHomePage(title: 'T E L E M E T O R'),
+
+            );
+          }
+
+    ),
+    );
+  }
+}
+
 
 class MyHomePage extends StatelessWidget {
   final String title;
@@ -46,18 +83,16 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-      color: Theme.of(context).primaryColor,
+      // padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),\
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xff1e1e1e),
           // Need to make a statefull appBar for status, packets and various information to be displayed
           centerTitle: true,
           title: Text(title),
         ),
-        body: const Padding(
-          padding: EdgeInsets.fromLTRB(10, 10, 70, 10),
-          child: RowApp(),
-        ),
+        body: RowApp(),
+        backgroundColor: Color(0xff424242),
       ),
     );
   }
@@ -74,7 +109,10 @@ class MyHomePage extends StatelessWidget {
     return x3;
   }
 }
+class TopHeader extends AppBar{
+  TopHeader({super.key, required String title}):super(title: Text(title),centerTitle: true);
 
+}
 class RowApp extends StatelessWidget {
   const RowApp({
     super.key,
@@ -86,17 +124,37 @@ class RowApp extends StatelessWidget {
       AspectRatio(
         aspectRatio: 3 / 10,
         child: Container(
-          color: Theme.of(context).primaryColor,
-          margin: const EdgeInsets.all(10),
+          decoration:  BoxDecoration(
+            color: Color(0xff212121),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Color(0xff212121), width: 2),
+
+
+
+
+          ),
+          // padding: EdgeInsets.all(10),
+          margin: EdgeInsets.all(10),
+          alignment: Alignment.centerLeft,
+          constraints: const BoxConstraints(
+            minWidth: 200,
+            minHeight: 600,
+          ),
+
+
+          // color: Color(0xff1e1e1e),
+          // margin: const EdgeInsets.Rall(10),
           child: Dashboard(),
         ),
       ),
       Expanded(
+
         child: Container(
-          color: Theme.of(context).primaryColor,
-          margin: const EdgeInsets.all(10),
+          color: Color(0xff1e1e1e),
+          margin: const EdgeInsets.all(40),
           child: Container(
-              margin: const EdgeInsets.all(10), child: CharMainScreen()),
+              // margin: const EdgeInsets.all(10),
+              child: CharMainScreen()),
         ),
       ),
     ]);
@@ -108,20 +166,20 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        // AltitudeChart(),
-        Expanded(
-          child: Container(
+    return Flexible(
+        child:Container(
+            constraints:const BoxConstraints(
+              minWidth: 200,
+              minHeight: 200,
+            ),
+
             // height: 200,
-            width: 200,
+            // width: 200,
+            // color: Colors.black,
             child: const Text(
-                style: TextStyle(color: Color(0xFFc2255c)), 'Hello World'),
-            color: Colors.blue,
-          ),
-        ),
-      ],
-    );
+                style: TextStyle(color: Color(0xff1ccc9d)), 'Hello World'),
+
+    ));
   }
 }
 // this is our main screen where ALtitude , Temperature, Velocity, Accelerattion, Gyroscope Values as of now
@@ -132,8 +190,11 @@ class CharMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  Expanded(
+
         child: Column(children: <Widget>[
+
       Expanded(
+        flex: 2,
         child: Row(
           children: <Widget>[
             Expanded(
@@ -143,22 +204,23 @@ class CharMainScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: Temperature(),
+              child: AspectRatio(aspectRatio: 16/15,child: Temperature(),)
             ),
             Expanded(
-              child: Velocity(),
+              child: AspectRatio(aspectRatio: 16/15,child: Velocity(),)
             ),
           ],
         ),
       ),
       Expanded(
+        flex: 3,
         child: Row(
           children: <Widget>[
             Expanded(
-              child: Acceleration(),
+              child: AspectRatio(aspectRatio: 16/13,child: Gyroscope(),)
             ),
             Expanded(
-              child: Gyroscope(),
+              child: AspectRatio(aspectRatio: 16/13,child: Acceleration(),) ,
             ),
           ],
         ),
@@ -173,8 +235,26 @@ class Altitude extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 10,
+      width: 10,
       margin: const EdgeInsets.all(10),
-      child: AltitudeChart(),
+      // color: Colors.red,
+      child:  SizedBox(
+
+        child: SizedBox(
+          height: 10,
+          width: 10,
+          child: Container(
+            margin: const EdgeInsets.all(10),
+            height: 10,
+            width: 10,
+            color: Colors.black,
+
+          ),
+
+        ),
+
+      ),
       // AccelerationChart(),
     );
   }
@@ -187,7 +267,12 @@ class Temperature extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(10),
-      child: AltitudeChart(),
+      color: Colors.black,
+      child: const SizedBox(
+        height: 200,
+        width: 200,
+
+      ),
       // AccelerationChart(),
     );
   }
@@ -200,7 +285,12 @@ class Velocity extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(10),
-      child: AltitudeChart(),
+      color: Colors.black,
+      child: const SizedBox(
+        height: 200,
+        width: 200,
+
+      ),
       // AccelerationChart(),
     );
   }
@@ -213,7 +303,12 @@ class Acceleration extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(10),
-      child: AltitudeChart(),
+      color: Color(0xff000000),
+      child: const SizedBox(
+        height: 200,
+        width: 200,
+
+      ),
       // AccelerationChart(),
     );
   }
@@ -226,7 +321,14 @@ class Gyroscope extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(10),
-      child: AltitudeChart(),
+      color: Colors.black,
+      child: const SizedBox(
+        height: 200,
+        width: 200,
+        child: Text('Gyroscope'),
+
+
+      ),
       // AccelerationChart(),
     );
   }
@@ -396,6 +498,49 @@ class NetworkHandler{
   * 8. logging useful events
   *
   * */
+  bool ackStatus = false;
+  Future<Socket> connectToServer()async {
+    Socket socket = await Socket.connect('localhost', 12345);
+    logger.i('Connected to server');
+    late String res='' ;
+    socket.listen(
+          (Uint8List data) {
+        res = String.fromCharCodes(data);
+        logger.i('Server: $res');
+      },
+    );
+    while (true)  {
+      if (res == 'ACK-CONNECT'){
+        logger.i('Server: $res');
+
+        await sendMessage(socket, 'ACK-CONNECT');
+
+
+      }
+      else if (res=="ACK-EXCHANGE"){
+        logger.i('Server: $res');
+        await sendMessage(socket, 'ACK-EXCHANGE');
+        logger.i(res);
+        await sendMessage(socket, 'ACK-COMPLETE');
+
+      }
+      else{
+        logger.i('Server: $res');
+        await Future.delayed(Duration(seconds: 2));
+
+
+
+      }
+
+    }
+    return socket;
+  }
+
+  Future<void> sendMessage(Socket socket, String message) async {
+    print('Client: $message');
+    socket.write(message);
+    await Future.delayed(Duration(seconds: 2));
+  }
 }
 class PacketHandler{
   // To-do

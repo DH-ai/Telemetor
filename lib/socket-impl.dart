@@ -13,13 +13,13 @@ void connectToServer()async{
   String res = 'choot mara';
   var temp;
   socket.listen(
-      (Uint8List data) {
-        temp = data;
-        res = String.fromCharCodes(data);
+        (Uint8List data) {
+          temp = data;
+          res = String.fromCharCodes(data);
 
-        // print('Server: $res');
+          // print('Server: $res');
 
-      },
+        },
   );
   while (true)  {
     if (res == 'ACK-CONNECT'){

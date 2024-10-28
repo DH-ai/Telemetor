@@ -109,7 +109,7 @@ class SocketServer:
         accept_thread = threading.Thread(target=self.accept_clients)
         accept_thread.start()
         # accept_thread.join()
-        print("SOME SHITTY STUFFFFFFF IT SHOULD NOT BE PRINT IF IM RIGHT")
+        # temp_thread_to_print_time.join()
 
     ## will edit it or remove it later
     def print_time(self):
@@ -177,7 +177,7 @@ class SocketServer:
             # csvobj = CsvToJson(FILEPATH)
 
             while not ACK_SUCCESS:
-                if retries > 4:
+                if retries > 10:
                     ACK_SUCCESS = False
                     logging.error("Max Retries reached")
                     logging.info("Closing the connection")
