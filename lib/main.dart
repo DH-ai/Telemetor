@@ -21,8 +21,7 @@ var logger =Logger() ;
 
 void main() {
   runApp(const MyApp());
-  var netobj=NetworkHandler();
-  netobj.connectToServer();
+
 }
 
 
@@ -212,7 +211,7 @@ class CharMainScreen extends StatelessWidget {
           ],
         ),
       ),
-      Expanded(
+      const Expanded(
         flex: 3,
         child: Row(
           children: <Widget>[
@@ -271,6 +270,7 @@ class Temperature extends StatelessWidget {
       child: const SizedBox(
         height: 200,
         width: 200,
+        child:AltitudeChart(),
 
       ),
       // AccelerationChart(),
@@ -502,44 +502,7 @@ class NetworkHandler{
   bool ackStatus = false;
   late Packets packet ;
 
-  Future<Socket> connectToServer()async {
-    Socket socket = await Socket.connect('localhost', 12345);
-    logger.i('Connected to server');
-    late String res='' ;
-    socket.listen(
-          (Uint8List data) {
-        res = String.fromCharCodes(data);
 
-      },
-    );
-    final data = res;
-    if (data == 'ACK-CONNECT') {
-      logger.i('Server: $data');
-
-      await sendMessage(socket, 'ACK-CONNECT');
-
-      // Step 2: Wait for ACK-EXCHANGE
-    }else if (data=="ACK-EXCHANGE"){
-        logger.i('Server: $data');
-        await sendMessage(socket, 'ACK-EXCHANGE');
-        final res = await _receiveData(socket);
-        logger.i('Server: $res');
-        var temp = _processPacket(res);
-        logger.i('Server: $temp');
-        await sendMessage(socket, 'ACK-COMPLETE');
-
-
-
-
-
-      }
-      else{
-          logger.i('Server: ${_receiveData(socket)} ');
-      }
-
-    }
-    return socket;
-  }
   List<E> _processPacket<E>(String packet){
     final regex = RegExp(r'HEADERS\{([^}]*)\}:TYPES\{([^}]*)\}');
     final match = regex.firstMatch(packet);

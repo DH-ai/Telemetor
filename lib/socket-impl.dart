@@ -10,7 +10,7 @@ void connectToServer()async{
   bool ackStatus = false;
 
 
-  String res = 'choot mara';
+  String res = 'dsadsas';
   var temp;
   socket.listen(
         (Uint8List data) {
