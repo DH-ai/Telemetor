@@ -24,7 +24,7 @@
     - [ ] Reading or subscribignt to the data stream
     - [ ] processing of data in the parent class of all the data
     - [ ] passing data to the child widgets
-    - [ ] 
+    - [ ] Legend in child widgets
     - [ ] working on ui components, hero elements, light dark mode
     - [ ] extrapolation or interpolation might try
     - [ ] error handling and stuff
