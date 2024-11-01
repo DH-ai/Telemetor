@@ -11,16 +11,20 @@
   - [x] Threading
   - [x] Sockets
   - [ ] Socket Server
-    - [x] sds
     - [x] Acknowledgments Mechanism
     - [x] Realtime Data Flow
     - [ ] Error Handling
     - [ ] Implementing the Serial Communication thread
-  - [ ] Implementing Sockets in dart
-    - [ ] Implementing isolates, streams and futures whatever suite the use
-    - [x] Try accessing data and printing it on console
-    - [ ] Csv parser in dart
-    - [ ] Boiler plate class - For the data Modular data visualization
+  - [ ] Implementing Sockets in dart / Frontend
+    - [ ] Network class implmentation to handle the socket connection
+    - [ ] Implementing the socket connection
+    - [ ] Implementing the data flow and classes to broadcast the data
+    - [ ] usable data plotter class 
+    - [ ] Implementing the data plotter class
+    - [ ] Reading or subscribignt to the data stream
+    - [ ] processing of data in the parent class of all the data
+    - [ ] passing data to the child widgets
+    - [ ] 
     - [ ] working on ui components, hero elements, light dark mode
     - [ ] extrapolation or interpolation might try
     - [ ] error handling and stuff
