@@ -599,22 +599,26 @@ class NetworkHandler {
     socket.listen((Uint8List data) {
       final ack = utf8.decode(data);
       logger.i('Received: $ack');
+      Future.delayed(Duration(seconds: 2));
+
       if (ack == 'ACK-CONNECT') {
         sendMessage(socket, 'ACK-CONNECT');
         // isseu with the ackstatus
+        
 
       }else{
         logger.e('Acknowledgement Failed');
       }
     });
+
     if (await _receiveData(socket) == 'ACK-CONNECT') {
       await sendMessage(socket, 'ACK-CONNECT');
-      print(await _receiveData(socket));
+      print(await _receiveData(socket)); // need to figure out alternative for this
       ackstatus = true;
     } else {
       logger.e('Acknowledgement Failed');
     }
-    Future.delayed(Duration(seconds: 5));
+    Future.delayed(Duration(seconds: 2));
 
 
 
@@ -632,12 +636,15 @@ class NetworkHandler {
   }
   Future<void> sendMessage(Socket socket, String message) async {
     logger.i('Sending: $message');
-    socket.add(utf8.encode(message));
+    socket.write(utf8.encode(message));
     await Future.delayed(Duration(seconds: 2));
   }
   Future<String> _receiveData(Socket serverSocket) async {
     final response = await serverSocket.first;
+    await Future.delayed(Duration(seconds: 2));
+
     return utf8.decode(response);
+
   }
 
   
