@@ -334,6 +334,48 @@ class Gyroscope extends StatelessWidget {
   }
 }
 
+
+// 1. passing the data
+// 2. passing the respective x and y index to its respective chart ex(acc vs time)
+// 3. title
+// 4. x and y indexes actually
+// 5. able to plot multiple charts in single chart
+// 6. legend option
+// 7. color option
+
+class DataPlotterClass extends StatefulWidget{
+  final List<List<dynamic>> data;
+  final int xIndex;
+  final List<int> yIndex;
+  final String title;
+  final bool legend;
+ //will look into it later
+  const DataPlotterClass({super.key, required this.data, required this.xIndex, required this.yIndex, required this.title, required this.legend});
+
+  @override
+  State<DataPlotterClass> createState() => _DataPlotterClassState();
+}
+
+class _DataPlotterClassState extends State<DataPlotterClass>{
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Text('Hello World'),
+    );
+  }
+
+}
+
+
 class AltitudeChart extends StatefulWidget {
   const AltitudeChart({super.key});
 
@@ -341,8 +383,11 @@ class AltitudeChart extends StatefulWidget {
   State<AltitudeChart> createState() => _AltitudeChartState();
 }
 
+
+
 class _AltitudeChartState extends State<AltitudeChart> {
   final List<FlSpot> _datapoints = [];
+  final List<FlSpot> _datapoints2= [];
 
   final String filePath = 'D:/Obfuscation/telemetor/Backend/rocket.csv';
 
@@ -388,11 +433,12 @@ class _AltitudeChartState extends State<AltitudeChart> {
                 double.parse(_csvData[14][1].toString()) +
                 1;
             _altitude = double.parse(_csvData[_currentIndex][4].toString());
-            y_max = max(y_max!, _altitude);
+            y_max = max(y_max!, 2*_altitude);
             y_min = min(y_min!, _altitude);
             x_max = max(x_max!, _time);
             x_min = min(x_min!, _time);
             _datapoints.add(FlSpot(_time, _altitude));
+            _datapoints2.add(FlSpot(_time, 2*_altitude));
             _currentIndex++;
           }
         } else {
@@ -427,6 +473,16 @@ class _AltitudeChartState extends State<AltitudeChart> {
 
             // isStrokeCapRound: true,
           ),
+          LineChartBarData(
+            spots: _datapoints2,
+            isCurved: true,
+            color: Colors.blueGrey,
+            barWidth: 1,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+
+            // isStrokeCapRound: true,
+          )
         ],
       ),
     );
