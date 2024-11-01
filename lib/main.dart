@@ -596,23 +596,24 @@ class NetworkHandler {
   Future<bool> acknowledge(Socket socket) async {
     // Acknowledgement
     bool ackstatus = false;
-    socket.listen((Uint8List data) {
-      final ack = utf8.decode(data);
-      logger.i('Received: $ack');
-      Future.delayed(Duration(seconds: 2));
-
-      if (ack == 'ACK-CONNECT') {
-        sendMessage(socket, 'ACK-CONNECT');
-        // isseu with the ackstatus
-        
-
-      }else{
-        logger.e('Acknowledgement Failed');
-      }
-    });
+    // socket.listen((Uint8List data) {
+    //   final ack = utf8.decode(data);
+    //   logger.i('Received: $ack');
+    //   Future.delayed(Duration(seconds: 2));
+    //
+    //   if (ack == 'ACK-CONNECT') {
+    //     sendMessage(socket, 'ACK-CONNECT');
+    //     // isseu with the ackstatus
+    //
+    //
+    //   }else{
+    //     logger.e('Acknowledgement Failed');
+    //   }
+    // });
 
     if (await _receiveData(socket) == 'ACK-CONNECT') {
       await sendMessage(socket, 'ACK-CONNECT');
+      print(socket.last);
       print(await _receiveData(socket)); // need to figure out alternative for this
       ackstatus = true;
     } else {
