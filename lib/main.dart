@@ -486,7 +486,7 @@ class Packets{
   Packets({required this.data});
 
 }
-class NetworkHandler{
+class NetworkHandler {
   // Responsible for handling the network
   /*
   * 1.Establish and manage socket connections.
@@ -519,7 +519,12 @@ class NetworkHandler{
     final response = await serverSocket.first;
     return utf8.decode(response);
   }
+
+  
 }
+
+
+
 class PacketHandler{
   // To-do
   /*
