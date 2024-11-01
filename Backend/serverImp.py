@@ -75,7 +75,8 @@ SAMAPLINGTIME = SAMAPLINGTIME/1000
 FILEPATH = 'D:/Obfuscation/telemetor/Backend/rocket.csv'
 TEMPPATH = 'D:/Obfuscation/telemetor/Backend/csv-temp/data.csv'
 ROCKETLAUNCH = False
-
+PORT = 12345
+HOST = "127.0.0.1"
 
 class SerialComm:
     def __init__(self, port:str, baudrate:int):
@@ -86,7 +87,7 @@ class SerialComm:
 
 
 class SocketServer:
-    def __init__(self, host="127.0.0.1", port=12345):
+    def __init__(self, host=HOST, port=PORT):
         self.host = host
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

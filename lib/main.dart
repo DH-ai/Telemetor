@@ -17,10 +17,15 @@ import 'dart:typed_data'; // for Uint8List
 *Map for longitudnal and latitudnal Google Maps Api
 *
 */
+
+const SocketHost = '127.0.0.1';
+const SocketPort = 12345;
 var logger =Logger() ;
 
 void main() {
   runApp(const MyApp());
+  var networkHandler = NetworkHandler(host: SocketHost, port: SocketPort);
+  networkHandler.connect();
 
 }
 
@@ -542,6 +547,8 @@ class Packets{
   Packets({required this.data});
 
 }
+
+
 class NetworkHandler {
   // Responsible for handling the network
   /*
@@ -557,6 +564,63 @@ class NetworkHandler {
   * */
   bool ackStatus = false;
   late Packets packet ;
+  final String host;
+  final int port;
+  final timeout = 10;
+  NetworkHandler({required this.host , required this.port});
+
+  Future<void> connect() async {
+    // socket object
+    final serverSocket = await Socket.connect(host, port);
+
+    logger.i('Connected to: ${serverSocket.remoteAddress.address}:${serverSocket.remotePort}');
+
+    // Acknowledgement
+    while (!ackStatus) {
+      if (await acknowledge(serverSocket)) {
+        logger.i('Acknowledgement Completed');
+        logger.i("Initializing data transfer");
+
+        //now here i want to make a function call to the function that will recive the continous data and broadcast it to the respective widgets
+
+
+        ackStatus=true;
+        break;
+      } else {
+        logger.e('Acknowledgement Failed');
+        logger.e("retrying.....");
+      }
+    }
+
+  }
+  Future<bool> acknowledge(Socket socket) async {
+    // Acknowledgement
+    bool ackstatus = false;
+    socket.listen((Uint8List data) {
+      final ack = utf8.decode(data);
+      logger.i('Received: $ack');
+      if (ack == 'ACK-CONNECT') {
+        sendMessage(socket, 'ACK-CONNECT');
+        // isseu with the ackstatus
+
+      }else{
+        logger.e('Acknowledgement Failed');
+      }
+    });
+    if (await _receiveData(socket) == 'ACK-CONNECT') {
+      await sendMessage(socket, 'ACK-CONNECT');
+      print(await _receiveData(socket));
+      ackstatus = true;
+    } else {
+      logger.e('Acknowledgement Failed');
+    }
+    Future.delayed(Duration(seconds: 5));
+
+
+
+
+    return ackstatus;
+  }
 
 
   List<E> _processPacket<E>(String packet){
