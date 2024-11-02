@@ -619,7 +619,7 @@ class NetworkHandler {
         logger.i('Received: $types');
         sendMessage(socket, 'ACK-COMPLETE');
         ackStatus =true;
-        subscription?.cancel();
+        subscription?.cancel(); // i cannot do this -_-
         logger.i("Stream closed");
         // data process
 
