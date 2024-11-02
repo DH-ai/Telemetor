@@ -593,6 +593,7 @@ class NetworkHandler {
         String? dataString = match1?.group(1);
         print(dataString);
         int? AckNum = int.parse((match1?.group(2))!);
+        sendMessage(socket, '::ACK($AckNum)');
         print(AckNum);
         final match2 = reg2.allMatches(dataString!);
         List<dynamic> dataVal = [];

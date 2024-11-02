@@ -287,8 +287,6 @@ class SocketServer:
         while ROCKETLAUNCH and retries < 5: 
             try:
                 data = bufferQueue.get() ## string bascially json data
-                
-                print(data==[])
                 if data !="[]": 
                     #  try lock 
                     logging.info("Sending data to {}".format(client_socket.getpeername()))
