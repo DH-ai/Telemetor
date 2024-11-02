@@ -20,15 +20,13 @@ import 'dart:typed_data'; // for Uint8List
 
 const SocketHost = '127.0.0.1';
 const SocketPort = 12345;
-var logger =Logger() ;
+var logger = Logger();
 
 void main() {
   runApp(const MyApp());
   var networkHandler = NetworkHandler(host: SocketHost, port: SocketPort);
   networkHandler.connect();
-
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -36,20 +34,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-
-        child:ClipRect(
-
-          child: Container(
-            constraints: const BoxConstraints(
-              minWidth: 400, // Set your minimum width
-              minHeight: 600,
-
-            ),
-            child: const AppClass(),
-          ),
-        )
-
-    );
+        child: ClipRect(
+      child: Container(
+        constraints: const BoxConstraints(
+          minWidth: 400, // Set your minimum width
+          minHeight: 600,
+        ),
+        child: const AppClass(),
+      ),
+    ));
   }
 }
 
@@ -61,23 +54,18 @@ class AppClass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home:LayoutBuilder(
-          builder: (context,constraints ) {
-            return Container(
-              constraints: const BoxConstraints(
-                minWidth: 400, // Set your minimum width
-                minHeight: 600, // Set your minimum height
-              ),
-              child: const MyHomePage(title: 'T E L E M E T O R'),
-
-            );
-          }
-
-    ),
+      home: LayoutBuilder(builder: (context, constraints) {
+        return Container(
+          constraints: const BoxConstraints(
+            minWidth: 400, // Set your minimum width
+            minHeight: 600, // Set your minimum height
+          ),
+          child: const MyHomePage(title: 'T E L E M E T O R'),
+        );
+      }),
     );
   }
 }
-
 
 class MyHomePage extends StatelessWidget {
   final String title;
@@ -113,10 +101,12 @@ class MyHomePage extends StatelessWidget {
     return x3;
   }
 }
-class TopHeader extends AppBar{
-  TopHeader({super.key, required String title}):super(title: Text(title),centerTitle: true);
 
+class TopHeader extends AppBar {
+  TopHeader({super.key, required String title})
+      : super(title: Text(title), centerTitle: true);
 }
+
 class RowApp extends StatelessWidget {
   const RowApp({
     super.key,
@@ -128,14 +118,10 @@ class RowApp extends StatelessWidget {
       AspectRatio(
         aspectRatio: 3 / 10,
         child: Container(
-          decoration:  BoxDecoration(
+          decoration: BoxDecoration(
             color: Color(0xff212121),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Color(0xff212121), width: 2),
-
-
-
-
           ),
           // padding: EdgeInsets.all(10),
           margin: EdgeInsets.all(10),
@@ -145,14 +131,12 @@ class RowApp extends StatelessWidget {
             minHeight: 600,
           ),
 
-
           // color: Color(0xff1e1e1e),
           // margin: const EdgeInsets.Rall(10),
           child: Dashboard(),
         ),
       ),
       Expanded(
-
         child: Container(
           color: Color(0xff1e1e1e),
           margin: const EdgeInsets.all(40),
@@ -171,18 +155,17 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Flexible(
-        child:Container(
-            constraints:const BoxConstraints(
-              minWidth: 200,
-              minHeight: 200,
-            ),
+        child: Container(
+      constraints: const BoxConstraints(
+        minWidth: 200,
+        minHeight: 200,
+      ),
 
-            // height: 200,
-            // width: 200,
-            // color: Colors.black,
-            child: const Text(
-                style: TextStyle(color: Color(0xff1ccc9d)), 'Hello World'),
-
+      // height: 200,
+      // width: 200,
+      // color: Colors.black,
+      child:
+          const Text(style: TextStyle(color: Color(0xff1ccc9d)), 'Hello World'),
     ));
   }
 }
@@ -193,26 +176,30 @@ class CharMainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Expanded(
-
+    return Expanded(
         child: Column(children: <Widget>[
-
       Expanded(
         flex: 2,
         child: Row(
           children: <Widget>[
             Expanded(
-
               child: Container(
-                child: AspectRatio(aspectRatio: 16/15,child: Altitude(),) ,
+                child: AspectRatio(
+                  aspectRatio: 16 / 15,
+                  child: Altitude(),
+                ),
               ),
             ),
             Expanded(
-              child: AspectRatio(aspectRatio: 16/15,child: Temperature(),)
-            ),
+                child: AspectRatio(
+              aspectRatio: 16 / 15,
+              child: Temperature(),
+            )),
             Expanded(
-              child: AspectRatio(aspectRatio: 16/15,child: Velocity(),)
-            ),
+                child: AspectRatio(
+              aspectRatio: 16 / 15,
+              child: Velocity(),
+            )),
           ],
         ),
       ),
@@ -221,10 +208,15 @@ class CharMainScreen extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Expanded(
-              child: AspectRatio(aspectRatio: 16/13,child: Gyroscope(),)
-            ),
+                child: AspectRatio(
+              aspectRatio: 16 / 13,
+              child: Gyroscope(),
+            )),
             Expanded(
-              child: AspectRatio(aspectRatio: 16/13,child: Acceleration(),) ,
+              child: AspectRatio(
+                aspectRatio: 16 / 13,
+                child: Acceleration(),
+              ),
             ),
           ],
         ),
@@ -243,8 +235,7 @@ class Altitude extends StatelessWidget {
       width: 10,
       margin: const EdgeInsets.all(10),
       // color: Colors.red,
-      child:  SizedBox(
-
+      child: SizedBox(
         child: SizedBox(
           height: 10,
           width: 10,
@@ -253,11 +244,8 @@ class Altitude extends StatelessWidget {
             height: 10,
             width: 10,
             color: Colors.black,
-
           ),
-
         ),
-
       ),
       // AccelerationChart(),
     );
@@ -275,8 +263,7 @@ class Temperature extends StatelessWidget {
       child: const SizedBox(
         height: 200,
         width: 200,
-        child:AltitudeChart(),
-
+        child: AltitudeChart(),
       ),
       // AccelerationChart(),
     );
@@ -294,7 +281,6 @@ class Velocity extends StatelessWidget {
       child: const SizedBox(
         height: 200,
         width: 200,
-
       ),
       // AccelerationChart(),
     );
@@ -312,7 +298,6 @@ class Acceleration extends StatelessWidget {
       child: const SizedBox(
         height: 200,
         width: 200,
-
       ),
       // AccelerationChart(),
     );
@@ -331,14 +316,11 @@ class Gyroscope extends StatelessWidget {
         height: 200,
         width: 200,
         child: Text('Gyroscope'),
-
-
       ),
       // AccelerationChart(),
     );
   }
 }
-
 
 // 1. passing the data
 // 2. passing the respective x and y index to its respective chart ex(acc vs time)
@@ -348,25 +330,30 @@ class Gyroscope extends StatelessWidget {
 // 6. legend option
 // 7. color option
 
-class DataPlotterClass extends StatefulWidget{
+class DataPlotterClass extends StatefulWidget {
   final List<List<dynamic>> data;
   final int xIndex;
   final List<int> yIndex;
   final String title;
   final bool legend;
- //will look into it later
-  const DataPlotterClass({super.key, required this.data, required this.xIndex, required this.yIndex, required this.title, required this.legend});
+
+  //will look into it later
+  const DataPlotterClass(
+      {super.key,
+      required this.data,
+      required this.xIndex,
+      required this.yIndex,
+      required this.title,
+      required this.legend});
 
   @override
   State<DataPlotterClass> createState() => _DataPlotterClassState();
 }
 
-class _DataPlotterClassState extends State<DataPlotterClass>{
-
+class _DataPlotterClassState extends State<DataPlotterClass> {
   @override
   void initState() {
     // TODO: implement initState
-
 
     super.initState();
   }
@@ -377,9 +364,7 @@ class _DataPlotterClassState extends State<DataPlotterClass>{
       child: Text('Hello World'),
     );
   }
-
 }
-
 
 class AltitudeChart extends StatefulWidget {
   const AltitudeChart({super.key});
@@ -388,11 +373,9 @@ class AltitudeChart extends StatefulWidget {
   State<AltitudeChart> createState() => _AltitudeChartState();
 }
 
-
-
 class _AltitudeChartState extends State<AltitudeChart> {
   final List<FlSpot> _datapoints = [];
-  final List<FlSpot> _datapoints2= [];
+  final List<FlSpot> _datapoints2 = [];
 
   final String filePath = 'D:/Obfuscation/telemetor/Backend/rocket.csv';
 
@@ -438,12 +421,12 @@ class _AltitudeChartState extends State<AltitudeChart> {
                 double.parse(_csvData[14][1].toString()) +
                 1;
             _altitude = double.parse(_csvData[_currentIndex][4].toString());
-            y_max = max(y_max!, 2*_altitude);
+            y_max = max(y_max!, 2 * _altitude);
             y_min = min(y_min!, _altitude);
             x_max = max(x_max!, _time);
             x_min = min(x_min!, _time);
             _datapoints.add(FlSpot(_time, _altitude));
-            _datapoints2.add(FlSpot(_time, 2*_altitude));
+            _datapoints2.add(FlSpot(_time, 2 * _altitude));
             _currentIndex++;
           }
         } else {
@@ -535,7 +518,7 @@ class CsvHandler {
 // }
 }
 
-class Packets{
+class Packets {
   /*
   * 1. Header
   * 2. Type
@@ -544,10 +527,9 @@ class Packets{
   late List<String> headers;
   late List<String> types;
   late String data;
+
   Packets({required this.data});
-
 }
-
 
 class NetworkHandler {
   // Responsible for handling the network
@@ -563,17 +545,19 @@ class NetworkHandler {
   *
   * */
   bool ackStatus = false;
-  late Packets packet ;
+  late Packets packet;
   final String host;
   final int port;
   final timeout = 10;
-  NetworkHandler({required this.host , required this.port});
+
+  NetworkHandler({required this.host, required this.port});
 
   Future<void> connect() async {
     // socket object
     final serverSocket = await Socket.connect(host, port);
 
-    logger.i('Connected to: ${serverSocket.remoteAddress.address}:${serverSocket.remotePort}');
+    logger.i(
+        'Connected to: ${serverSocket.remoteAddress.address}:${serverSocket.remotePort}');
 
     // Acknowledgement
     while (!ackStatus) {
@@ -583,27 +567,26 @@ class NetworkHandler {
 
         //now here i want to make a function call to the function that will recive the continous data and broadcast it to the respective widgets
 
-
-        ackStatus=true;
+        ackStatus = true;
         break;
       } else {
         logger.e('Acknowledgement Failed');
         logger.e("retrying.....");
+        Future.delayed(Duration(seconds: 3));
       }
     }
-
   }
+
   Future<bool> acknowledge(Socket socket) async {
     // Acknowledgement
     bool ackstatus = false;
     var last_ack;
-    StreamSubscription? subscription;
 
-    subscription = socket.listen((Uint8List data) {
-      if (ackstatus){
+    socket.listen((Uint8List data) {
+      if (ackstatus) {
         var dataNew = utf8.decode(data);
-      //        \[(.*?)\]::ACK\((\d+)\) to extract the ack number and data
-      //        \[(.*?)\] \\ to de group the data
+        //        \[(.*?)\]::ACK\((\d+)\) to extract the ack number and data
+        //        \[(.*?)\] \\ to de group the data
         RegExp reg1 = RegExp(r'\[(.*?)\]::ACK\((\d+)\)');
         RegExp reg2 = RegExp(r'\[(.*?)\]');
         final match1 = reg1.firstMatch(dataNew);
@@ -611,21 +594,14 @@ class NetworkHandler {
         print(dataString);
         int? AckNum = int.parse((match1?.group(2))!);
         print(AckNum);
-        final match2 = reg2.firstMatch(dataString!);
-        int? groupCount = match2?.groupCount;
-        for (var i=0;i<groupCount!;i++){
-          print(match2?.group(i+1));
+        final match2 = reg2.allMatches(dataString!);
+        List<dynamic> dataVal = [];
+        for (var match in match2) {
+          logger.i('Matches ${match.group(1)}');
         }
-
-
-
-;
-
-
-
-      }else {
+      } else {
         final ack = utf8.decode(data);
-        // logger.i('Received: $ack');
+        logger.i('Received: $ack');
 
         if (ack == 'ACK-CONNECT') {
           sendMessage(socket, 'ACK-CONNECT');
@@ -633,8 +609,7 @@ class NetworkHandler {
         } else if (ack == 'ACK-EXCHANGE') {
           sendMessage(socket, 'ACK-EXCHANGE');
           last_ack = ack;
-        }
-        else if (ack.contains("HEAD") && last_ack == 'ACK-EXCHANGE') {
+        } else if (ack.contains("HEAD") && last_ack == 'ACK-EXCHANGE') {
           RegExp regex = RegExp(r'HEADERS\[([^}]+)\]:TYPES\[([^}]+)\]');
           final match = regex.firstMatch(ack);
           final headers = match?.group(1);
@@ -656,8 +631,22 @@ class NetworkHandler {
       }
     });
 
-
-
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
+    // print("JEJALDJSALKJDLSAJDLSJALKJKLSJDKJSAKDJLKASJDLSALDJASLJDASJDLASKDJ");
     // if (await _receiveData(socket) == 'ACK-CONNECT') {
     //   await sendMessage(socket, 'ACK-CONNECT');
     //   print(socket.last); //
@@ -668,42 +657,37 @@ class NetworkHandler {
     // }
     // Future.delayed(Duration(seconds: 2));
 
-
-
-
     return ackstatus;
   }
 
-  Future<void> handleMessages  (Socket socket,headers,types)async{
+  Future<void> handleMessages(Socket socket, headers, types) async {
     logger.i("Handling Messages");
-    Future.delayed(Duration(seconds:15));
+    Future.delayed(Duration(seconds: 15));
   }
-  List<E> _processPacket<E>(String packet){
+
+  List<E> _processPacket<E>(String packet) {
     final regex = RegExp(r'HEADERS\{([^}]*)\}:TYPES\{([^}]*)\}');
     final match = regex.firstMatch(packet);
     final headers = match?.group(1);
     final types = match?.group(2);
     return [headers, types] as List<E>;
   }
+
   Future<void> sendMessage(Socket socket, String message) async {
     logger.i('Sending: $message');
     socket.write(message);
     await Future.delayed(Duration(seconds: 2));
   }
+
   Future<String> _receiveData(Socket serverSocket) async {
     final response = await serverSocket.first;
     await Future.delayed(Duration(seconds: 2));
 
     return utf8.decode(response);
-
   }
-
-  
 }
 
-
-
-class PacketHandler{
+class PacketHandler {
   // To-do
   /*
   * 1. Reading packet info from the buffer
@@ -713,5 +697,6 @@ class PacketHandler{
   * */
   late List<String> header;
   late List<String> type;
+
   PacketHandler({required this.header, required this.type});
 }
