@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 
 // import 'package:flutter/services.dart';
@@ -8,6 +10,7 @@ import 'csv_parser.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:async';
 import 'dart:core';
 import 'package:csv/csv.dart';
 import 'package:logger/logger.dart';
@@ -15,17 +18,30 @@ import 'dart:typed_data'; // for Uint8List
 
 /*
 *Map for longitudnal and latitudnal Google Maps Api
-*
+* BUGS
+*   1. The header is coming inside the queue on first run not after restart for some reason
 */
-
+var Header;
+var Type;
 const SocketHost = '127.0.0.1';
 const SocketPort = 12345;
 var logger = Logger();
+
+Queue<String> dataQueue = Queue<String>();
 
 void main() {
   runApp(const MyApp());
   var networkHandler = NetworkHandler(host: SocketHost, port: SocketPort);
   networkHandler.connect();
+}
+
+Future<void> printvalue() async {
+  while (true) {
+    if (dataQueue.isNotEmpty) {
+      print(dataQueue.removeFirst());
+    }
+    await Future.delayed(Duration(seconds: 1));
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -172,7 +188,12 @@ class Dashboard extends StatelessWidget {
 // this is our main screen where ALtitude , Temperature, Velocity, Accelerattion, Gyroscope Values as of now
 
 class CharMainScreen extends StatelessWidget {
-  const CharMainScreen({super.key});
+  CharMainScreen({super.key}) {
+    dataProvider();
+  }
+
+  final queue = dataQueue;
+  StreamController<List<int>> streamController = StreamController<List<int>>();
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +214,7 @@ class CharMainScreen extends StatelessWidget {
             Expanded(
                 child: AspectRatio(
               aspectRatio: 16 / 15,
-              child: Temperature(),
+              child: Temperature(stream: streamController),
             )),
             Expanded(
                 child: AspectRatio(
@@ -222,6 +243,22 @@ class CharMainScreen extends StatelessWidget {
         ),
       ),
     ]));
+  }
+
+  void dataProvider() async {
+    while (true) {
+      if (queue.isNotEmpty) {
+        var temp = queue.removeFirst();
+        List<int> tempInt = [];
+        RegExp reg = RegExp(r'\b(\d{2})\b');
+        var match = reg.allMatches(temp);
+        for (var i in match) {
+          tempInt.add(int.parse(i.group(0)!));
+        }
+        streamController.add(tempInt);
+      }
+      await Future.delayed(Duration(seconds: 2));
+    }
   }
 }
 
@@ -253,20 +290,42 @@ class Altitude extends StatelessWidget {
 }
 
 class Temperature extends StatelessWidget {
-  const Temperature({super.key});
+  StreamController<List<int>> stream;
+
+  Temperature({super.key, required this.stream});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      color: Colors.black,
-      child: const SizedBox(
-        height: 200,
-        width: 200,
-        child: AltitudeChart(),
-      ),
-      // AccelerationChart(),
-    );
+    return StreamBuilder<List<int>>(
+        stream: stream.stream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            logger.i(snapshot.data);
+            // logger.i(snapshot.);
+            Future.delayed(Duration(seconds: 2));
+            return Container(
+              margin: const EdgeInsets.all(10),
+              color: Colors.black,
+              child: SizedBox(
+                height: 200,
+                width: 200,
+                child:
+                    AltitudeChart(x: snapshot.data![0], y: snapshot.data![1]),
+              ),
+              // AccelerationChart(),
+            );
+          } else {
+            return Container(
+              margin: const EdgeInsets.all(10),
+              color: Colors.black,
+              child: const SizedBox(
+                height: 200,
+                width: 200,
+              ),
+              // AccelerationChart(),
+            );
+          }
+        });
   }
 }
 
@@ -367,73 +426,40 @@ class _DataPlotterClassState extends State<DataPlotterClass> {
 }
 
 class AltitudeChart extends StatefulWidget {
-  const AltitudeChart({super.key});
+  int x;
+  int y;
+
+  AltitudeChart({super.key, required this.x, required this.y});
 
   @override
-  State<AltitudeChart> createState() => _AltitudeChartState();
+  State<AltitudeChart> createState() => _AltitudeChartState(x, y);
 }
 
 class _AltitudeChartState extends State<AltitudeChart> {
   final List<FlSpot> _datapoints = [];
   final List<FlSpot> _datapoints2 = [];
-
+  var x;
+  var y;
   final String filePath = 'D:/Obfuscation/telemetor/Backend/rocket.csv';
 
-  // time coloumn
-  // altitude column
-  // final data = CsvHandler().readCsv(_AltitudeChartState().filePath);
-  int _currentIndex = 2;
+  _AltitudeChartState(this.x, this.y);
 
-  late List<List<dynamic>> _csvData;
-  double _time = 0;
-  double _altitude = 0;
-  double? y_min = -10;
-
-  double? y_max = 3000;
-
-  double? x_min = 100;
-
-  double? x_max = 40000;
+  double y_min = 0;
+  double y_max = 100;
+  double x_min = 0;
+  double x_max = 100;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
-
-    // _startTimer();
-  }
-
-  Future<void> _loadData() async {
-    _csvData = await CsvHandler().readCsv(filePath);
-
-    _startTimer();
-  }
-
-  void _startTimer() {
-    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        if (_currentIndex < _csvData.length) {
-          if (_csvData[_currentIndex][0] == _csvData[1][0]) {
-            _currentIndex++;
-          } else {
-            // print("${timer.tick}  $_currentIndex ${_csvData[_currentIndex][4]}");
-            _time = double.parse(_csvData[_currentIndex][1].toString()) -
-                double.parse(_csvData[14][1].toString()) +
-                1;
-            _altitude = double.parse(_csvData[_currentIndex][4].toString());
-            y_max = max(y_max!, 2 * _altitude);
-            y_min = min(y_min!, _altitude);
-            x_max = max(x_max!, _time);
-            x_min = min(x_min!, _time);
-            _datapoints.add(FlSpot(_time, _altitude));
-            _datapoints2.add(FlSpot(_time, 2 * _altitude));
-            _currentIndex++;
-          }
-        } else {
-          timer.cancel();
-        }
+        _datapoints.add(FlSpot(x.toDouble(), y.toDouble()));
+        // print(_datapoints);
       });
     });
+
+    // _startTimer();
   }
 
   @override
@@ -446,10 +472,10 @@ class _AltitudeChartState extends State<AltitudeChart> {
           rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
-        minX: x_min!,
-        maxX: x_max!,
-        minY: y_min!,
-        maxY: y_max!,
+        minX: x_min,
+        maxX: x_max,
+        minY: y_min,
+        maxY: y_max,
         lineBarsData: [
           LineChartBarData(
             spots: _datapoints,
@@ -461,16 +487,16 @@ class _AltitudeChartState extends State<AltitudeChart> {
 
             // isStrokeCapRound: true,
           ),
-          LineChartBarData(
-            spots: _datapoints2,
-            isCurved: true,
-            color: Colors.blueGrey,
-            barWidth: 1,
-            isStrokeCapRound: true,
-            dotData: const FlDotData(show: false),
-
-            // isStrokeCapRound: true,
-          )
+          // LineChartBarData(
+          //   spots: _datapoints2,
+          //   isCurved: true,
+          //   color: Colors.blueGrey,
+          //   barWidth: 1,
+          //   isStrokeCapRound: true,
+          //   dotData: const FlDotData(show: false),
+          //
+          //   // isStrokeCapRound: true,
+          // )
         ],
       ),
     );
@@ -560,20 +586,22 @@ class NetworkHandler {
         'Connected to: ${serverSocket.remoteAddress.address}:${serverSocket.remotePort}');
 
     // Acknowledgement
-    while (!ackStatus) {
-      if (await acknowledge(serverSocket)) {
-        logger.i('Acknowledgement Completed');
-        logger.i("Initializing data transfer");
 
-        //now here i want to make a function call to the function that will recive the continous data and broadcast it to the respective widgets
+    logger.i('ACKNOWLEDGEMENT Started');
+    await Future.delayed(Duration(seconds: 2));
+    try {
+      await acknowledge(serverSocket);
+      logger.i('Acknowledgement Completed');
+      logger.i("Initializing data transfer");
 
-        ackStatus = true;
-        break;
-      } else {
-        logger.e('Acknowledgement Failed');
-        logger.e("retrying.....");
-        Future.delayed(Duration(seconds: 3));
-      }
+      //now here i want to make a function call to the function that will recive the continous data and broadcast it to the respective widgets
+
+      ackStatus = true;
+    } catch (e) {
+      logger.e('Acknowledgement Failed $e');
+
+      logger.e("retrying.....");
+      Future.delayed(Duration(seconds: 3));
     }
   }
 
@@ -581,28 +609,31 @@ class NetworkHandler {
     // Acknowledgement
     bool ackstatus = false;
     var last_ack;
+    logger.i("Socket.listen()");
+    await Future.delayed(Duration(seconds: 2));
 
-    socket.listen((Uint8List data) {
+    socket.listen((Uint8List data) async {
       if (ackstatus) {
         var dataNew = utf8.decode(data);
+
         //        \[(.*?)\]::ACK\((\d+)\) to extract the ack number and data
         //        \[(.*?)\] \\ to de group the data
         RegExp reg1 = RegExp(r'\[(.*?)\]::ACK\((\d+)\)');
         RegExp reg2 = RegExp(r'\[(.*?)\]');
         final match1 = reg1.firstMatch(dataNew);
         String? dataString = match1?.group(1);
-        print(dataString);
+
         int? AckNum = int.parse((match1?.group(2))!);
         sendMessage(socket, '::ACK($AckNum)');
-        print(AckNum);
         final match2 = reg2.allMatches(dataString!);
         List<dynamic> dataVal = [];
         for (var match in match2) {
-          logger.i('Matches ${match.group(1)}');
+          dataQueue.add((match.group(1)!));
         }
       } else {
         final ack = utf8.decode(data);
-        logger.i('Received: $ack');
+        logger.i('Received: $ack Now wait 10 seconds');
+        await Future.delayed(Duration(seconds: 10));
 
         if (ack == 'ACK-CONNECT') {
           sendMessage(socket, 'ACK-CONNECT');
@@ -675,14 +706,13 @@ class NetworkHandler {
   }
 
   Future<void> sendMessage(Socket socket, String message) async {
-    logger.i('Sending: $message');
+    // logger.i('Sending: $message');
     socket.write(message);
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
   }
 
   Future<String> _receiveData(Socket serverSocket) async {
     final response = await serverSocket.first;
-    await Future.delayed(Duration(seconds: 2));
 
     return utf8.decode(response);
   }

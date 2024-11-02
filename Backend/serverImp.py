@@ -59,8 +59,8 @@ def populate_csv():
             writer = csv.writer(file,lineterminator='\n')
             
             num = random.randint(1,10)
-            for i in range(1, num):
-                writer.writerow(['A',*[random.randint(1,100) for j in range(4)]])
+            for q in range(1, num):
+                writer.writerow([i+q,*[random.randint(1,100) for j in range(4)]])
 
             # logging.info("Appended {} rows to the csv".format(num-1))
 
