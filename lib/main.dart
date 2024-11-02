@@ -596,30 +596,43 @@ class NetworkHandler {
   Future<bool> acknowledge(Socket socket) async {
     // Acknowledgement
     bool ackstatus = false;
-    // socket.listen((Uint8List data) {
-    //   final ack = utf8.decode(data);
-    //   logger.i('Received: $ack');
-    //   Future.delayed(Duration(seconds: 2));
-    //
-    //   if (ack == 'ACK-CONNECT') {
-    //     sendMessage(socket, 'ACK-CONNECT');
-    //     // isseu with the ackstatus
-    //
-    //
-    //   }else{
-    //     logger.e('Acknowledgement Failed');
-    //   }
-    // });
+    socket.listen((Uint8List data) {
+      final ack = utf8.decode(data);
+      logger.i('Received: $ack');
+      var last_ack;
 
-    if (await _receiveData(socket) == 'ACK-CONNECT') {
-      await sendMessage(socket, 'ACK-CONNECT');
-      print(socket.last);
-      print(await _receiveData(socket)); // need to figure out alternative for this
-      ackstatus = true;
-    } else {
-      logger.e('Acknowledgement Failed');
-    }
-    Future.delayed(Duration(seconds: 2));
+      if (ack == 'ACK-CONNECT') {
+        sendMessage(socket, 'ACK-CONNECT');
+        last_ack = ack;
+      } else if (ack == 'ACK-EXCHANGE') {
+        sendMessage(socket, 'ACK-EXCHANGE');
+        last_ack = ack;
+      }
+      else if(ack.contains("HEAD") && last_ack == 'ACK-EXCHANGE'){
+        RegExp regex = RegExp(r'HEADERS\{([^}]+)\}:TYPES\{([^}]+)\}');
+        final match = regex.firstMatch(ack);
+        final headers = match?.group(1);
+        final types = match?.group(2);
+        logger.i('Received: $headers');
+        logger.i('Received: $types');
+        sendMessage(socket, 'ACK-COMPLETE');
+        // data process
+      }else{
+        logger.e('Acknowledgement Failed: Server sent $ack');
+        logger.i("Retrying....");
+
+      }
+    });
+
+    // if (await _receiveData(socket) == 'ACK-CONNECT') {
+    //   await sendMessage(socket, 'ACK-CONNECT');
+    //   print(socket.last); //
+    //   print(await _receiveData(socket)); // need to figure out alternative for this
+    //   ackstatus = true;
+    // } else {
+    //   logger.e('Acknowledgement Failed');
+    // }
+    // Future.delayed(Duration(seconds: 2));
 
 
 
@@ -637,7 +650,7 @@ class NetworkHandler {
   }
   Future<void> sendMessage(Socket socket, String message) async {
     logger.i('Sending: $message');
-    socket.write(utf8.encode(message));
+    socket.write(message);
     await Future.delayed(Duration(seconds: 2));
   }
   Future<String> _receiveData(Socket serverSocket) async {
