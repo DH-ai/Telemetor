@@ -33,12 +33,20 @@ void connectToServer()async{
       print('Server: $res');
       await sendMessage(socket, 'ACK-EXCHANGE');
       print(res);
+      RegExp regex = new RegExp(r"HEADERS\[([^}]*)\]:TYPES\[([^}]*)\]");
+      final match = regex.firstMatch(res);
+      final headers = match?.group(1);
+      final types = match?.group(2);
+      print(match);
+      print('Received: $headers');
+      print('Received: $types');
+
       await sendMessage(socket, 'ACK-COMPLETE');
 
     }
     else{
       print('Server: $res');
-      print(temp);
+      // print(temp);
       await Future.delayed(Duration(seconds: 2));
 
 

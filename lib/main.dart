@@ -600,35 +600,59 @@ class NetworkHandler {
     StreamSubscription? subscription;
 
     subscription = socket.listen((Uint8List data) {
-      final ack = utf8.decode(data);
-      // logger.i('Received: $ack');
+      if (ackstatus){
+        var dataNew = utf8.decode(data);
+      //        \[(.*?)\]::ACK\((\d+)\) to extract the ack number and data
+      //        \[(.*?)\] \\ to de group the data
+        RegExp reg1 = RegExp(r'\[(.*?)\]::ACK\((\d+)\)');
+        RegExp reg2 = RegExp(r'\[(.*?)\]');
+        final match1 = reg1.firstMatch(dataNew);
+        String? dataString = match1?.group(1);
+        print(dataString);
+        int? AckNum = int.parse((match1?.group(2))!);
+        print(AckNum);
+        final match2 = reg2.firstMatch(dataString!);
+        int? groupCount = match2?.groupCount;
+        for (var i=0;i<groupCount!;i++){
+          print(match2?.group(i+1));
+        }
 
-      if (ack == 'ACK-CONNECT') {
-        sendMessage(socket, 'ACK-CONNECT');
-        last_ack = ack;
-      } else if (ack == 'ACK-EXCHANGE') {
-        sendMessage(socket, 'ACK-EXCHANGE');
-        last_ack = ack;
-      }
-      else if(ack.contains("HEAD") && last_ack == 'ACK-EXCHANGE'){
-        RegExp regex = RegExp(r'HEADERS\{([^}]+)\}:TYPES\{([^}]+)\}');
-        final match = regex.firstMatch(ack);
-        final headers = match?.group(1);
-        final types = match?.group(2);
-        logger.i('Received: $headers');
-        logger.i('Received: $types');
-        sendMessage(socket, 'ACK-COMPLETE');
-        ackStatus =true;
-        handleMessages(socket, headers!, types!);
-        subscription?.cancel(); // i cannot do this -_-
-        logger.i("Stream closed");
-        // data process
 
-        // exit listen loop
-      }else{
-        logger.e('Acknowledgement Failed: Server sent $ack');
-        logger.i("Retrying....");
 
+;
+
+
+
+      }else {
+        final ack = utf8.decode(data);
+        // logger.i('Received: $ack');
+
+        if (ack == 'ACK-CONNECT') {
+          sendMessage(socket, 'ACK-CONNECT');
+          last_ack = ack;
+        } else if (ack == 'ACK-EXCHANGE') {
+          sendMessage(socket, 'ACK-EXCHANGE');
+          last_ack = ack;
+        }
+        else if (ack.contains("HEAD") && last_ack == 'ACK-EXCHANGE') {
+          RegExp regex = RegExp(r'HEADERS\[([^}]+)\]:TYPES\[([^}]+)\]');
+          final match = regex.firstMatch(ack);
+          final headers = match?.group(1);
+          final types = match?.group(2);
+          logger.i('Received: $headers');
+          logger.i('Received: $types');
+          sendMessage(socket, 'ACK-COMPLETE');
+          ackstatus = true;
+          // ReciveMessages(socket, headers!, types!);
+          // subscription?.cancel(); // i cannot do this -_-
+          logger.i("Stream closed");
+          // data process
+
+          // exit listen loop
+        } else {
+          logger.e('Acknowledgement Failed: Server sent $ack');
+          logger.i("Retrying....");
+        }
       }
     });
 

@@ -288,7 +288,7 @@ class SocketServer:
             try:
                 data = bufferQueue.get() ## string bascially json data
                 
-                
+                print(data==[])
                 if data !="[]": 
                     #  try lock 
                     logging.info("Sending data to {}".format(client_socket.getpeername()))
@@ -377,7 +377,7 @@ class DataHandler():
     def parser_csv(self):
         csv_obj = CsvToJson(self.file_path)
         csv_obj.readCsv(header=True,headerrows=self.headerrows)
-
+ 
         try:
             self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
             self.state = csv_obj.header.types # b'F' or b'S'
@@ -389,7 +389,8 @@ class DataHandler():
         try:
             while True:
                 data = csv_obj.packet() ## json data 
-                if data !=[]:
+                
+                if data !="[]":
                     self.data_queue.put(json.loads(data))
                 time.sleep(SAMAPLINGTIME)
         except Exception as e:
