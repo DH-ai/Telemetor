@@ -96,7 +96,7 @@ class SocketServer:
         self.connectionflag = False
         logging.info(f"ROCKETLAUNCH STATUS{ROCKETLAUNCH}")
         if ROCKETLAUNCH:
-            self.dataHandler = DataHandler(filePath=FILEPATH, queue=bufferQueue)
+            self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue,headerrows=1)
     
     def start(self,timeout=None):
         self.server_socket.bind((self.host, self.port))
@@ -349,7 +349,7 @@ class SocketServer:
 ## Will handle Serial Communitcatino in future
 class DataHandler():
     
-    def __init__(self, filePath=None,ser:serial.Serial=None,queue:Queue=None):
+    def __init__(self, filePath=None,ser:serial.Serial=None,queue:Queue=None,headerrows:int=None):
         assert filePath or ser, "Either file_path or serial port must be provided"
         assert not (filePath and ser), "Only one of file_path or serial port must be provided"
         
@@ -359,7 +359,7 @@ class DataHandler():
         ##
 
 
-
+        self.headerrows = headerrows
         self.file_path = filePath
         self.header = []
         self.data = []
@@ -376,7 +376,7 @@ class DataHandler():
     ## retru mechanism might be needed here or maybe better error manegment
     def parser_csv(self):
         csv_obj = CsvToJson(self.file_path)
-        csv_obj.readCsv(header=True,headerrows=2)
+        csv_obj.readCsv(header=True,headerrows=self.headerrows)
 
         try:
             self.header = csv_obj.header.headers # The entire header list from row 0 and row 2

@@ -601,7 +601,7 @@ class NetworkHandler {
 
     subscription = socket.listen((Uint8List data) {
       final ack = utf8.decode(data);
-      logger.i('Received: $ack');
+      // logger.i('Received: $ack');
 
       if (ack == 'ACK-CONNECT') {
         sendMessage(socket, 'ACK-CONNECT');
@@ -619,6 +619,7 @@ class NetworkHandler {
         logger.i('Received: $types');
         sendMessage(socket, 'ACK-COMPLETE');
         ackStatus =true;
+        handleMessages(socket, headers!, types!);
         subscription?.cancel(); // i cannot do this -_-
         logger.i("Stream closed");
         // data process
@@ -631,9 +632,7 @@ class NetworkHandler {
       }
     });
 
-    socket.listen((onData){
-      logger.i('Received: $onData');
-    });
+
 
     // if (await _receiveData(socket) == 'ACK-CONNECT') {
     //   await sendMessage(socket, 'ACK-CONNECT');
@@ -651,7 +650,10 @@ class NetworkHandler {
     return ackstatus;
   }
 
-
+  Future<void> handleMessages  (Socket socket,headers,types)async{
+    logger.i("Handling Messages");
+    Future.delayed(Duration(seconds:15));
+  }
   List<E> _processPacket<E>(String packet){
     final regex = RegExp(r'HEADERS\{([^}]*)\}:TYPES\{([^}]*)\}');
     final match = regex.firstMatch(packet);
