@@ -290,42 +290,22 @@ class Altitude extends StatelessWidget {
 }
 
 class Temperature extends StatelessWidget {
-  StreamController<List<int>> stream;
+  final StreamController<List<int>> stream;
 
   Temperature({super.key, required this.stream});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<int>>(
-        stream: stream.stream,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            logger.i(snapshot.data);
-            // logger.i(snapshot.);
-            Future.delayed(Duration(seconds: 2));
-            return Container(
-              margin: const EdgeInsets.all(10),
-              color: Colors.black,
-              child: SizedBox(
-                height: 200,
-                width: 200,
-                child:
-                    AltitudeChart(x: snapshot.data![0], y: snapshot.data![1]),
-              ),
-              // AccelerationChart(),
-            );
-          } else {
-            return Container(
-              margin: const EdgeInsets.all(10),
-              color: Colors.black,
-              child: const SizedBox(
-                height: 200,
-                width: 200,
-              ),
-              // AccelerationChart(),
-            );
-          }
-        });
+    return Container(
+      margin: const EdgeInsets.all(10),
+      color: Colors.black,
+      child: SizedBox(
+        height: 200,
+        width: 200,
+        child: AltitudeChart(myStream: stream),
+      ),
+      // AccelerationChart(),
+    );
   }
 }
 
@@ -426,23 +406,19 @@ class _DataPlotterClassState extends State<DataPlotterClass> {
 }
 
 class AltitudeChart extends StatefulWidget {
-  int x;
-  int y;
+  final StreamController<List<int>> myStream;
 
-  AltitudeChart({super.key, required this.x, required this.y});
+  const AltitudeChart({super.key, required this.myStream});
 
   @override
-  State<AltitudeChart> createState() => _AltitudeChartState(x, y);
+  State<AltitudeChart> createState() => _AltitudeChartState();
 }
 
 class _AltitudeChartState extends State<AltitudeChart> {
   final List<FlSpot> _datapoints = [];
-  final List<FlSpot> _datapoints2 = [];
-  var x;
-  var y;
-  final String filePath = 'D:/Obfuscation/telemetor/Backend/rocket.csv';
 
-  _AltitudeChartState(this.x, this.y);
+  final String filePath = 'D:/Obfuscation/telemetor/Backend/rocket.csv';
+  late final Stream<List<int>> stream;
 
   double y_min = 0;
   double y_max = 100;
@@ -452,14 +428,11 @@ class _AltitudeChartState extends State<AltitudeChart> {
   @override
   void initState() {
     super.initState();
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _datapoints.add(FlSpot(x.toDouble(), y.toDouble()));
-        // print(_datapoints);
-      });
+    stream = widget.myStream.stream;
+    stream.listen((event) {
+      _datapoints.add(FlSpot(event[0].toDouble(), event[1].toDouble()));
+      setState(() {});
     });
-
-    // _startTimer();
   }
 
   @override
@@ -633,7 +606,7 @@ class NetworkHandler {
       } else {
         final ack = utf8.decode(data);
         logger.i('Received: $ack Now wait 10 seconds');
-        await Future.delayed(Duration(seconds: 10));
+        // await Future.delayed(Duration(seconds: 10));
 
         if (ack == 'ACK-CONNECT') {
           sendMessage(socket, 'ACK-CONNECT');
