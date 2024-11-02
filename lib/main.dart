@@ -596,10 +596,12 @@ class NetworkHandler {
   Future<bool> acknowledge(Socket socket) async {
     // Acknowledgement
     bool ackstatus = false;
-    socket.listen((Uint8List data) {
+    var last_ack;
+    StreamSubscription? subscription;
+
+    subscription = socket.listen((Uint8List data) {
       final ack = utf8.decode(data);
       logger.i('Received: $ack');
-      var last_ack;
 
       if (ack == 'ACK-CONNECT') {
         sendMessage(socket, 'ACK-CONNECT');
@@ -616,12 +618,21 @@ class NetworkHandler {
         logger.i('Received: $headers');
         logger.i('Received: $types');
         sendMessage(socket, 'ACK-COMPLETE');
+        ackStatus =true;
+        subscription?.cancel();
+        logger.i("Stream closed");
         // data process
+
+        // exit listen loop
       }else{
         logger.e('Acknowledgement Failed: Server sent $ack');
         logger.i("Retrying....");
 
       }
+    });
+
+    socket.listen((onData){
+      logger.i('Received: $onData');
     });
 
     // if (await _receiveData(socket) == 'ACK-CONNECT') {
