@@ -7,23 +7,27 @@
 - [x] Learning about flutter and related tegit chnologies
 - [x] Design the app
 - [ ] Implement the app
-  - [x]Parser Python
+  - [x] Parser Python
   - [x] Threading
   - [x] Sockets
   - [ ] Socket Server
-    - [ ] sds
     - [x] Acknowledgments Mechanism
     - [x] Realtime Data Flow
     - [ ] Error Handling
     - [ ] Implementing the Serial Communication thread
-  - [ ] Implementing Sockets in dart
-    - [ ] Implmenting isolates, streams and futures whatever suite the use
-    - [ ] Try accesing data and priniting it on console
-    - [ ] Csv parser in dart
-    - [ ] boiler plate class/ independent class
-    - [ ] working on ui compenents, hero elementsm, light dark mode
-    - [ ] extrapolation or intrapolation might try
+  - [ ] Implementing Sockets in dart / Frontend
+    - [ ] Network class implmentation to handle the socket connection
+    - [ ] Implementing the socket connection
+    - [ ] Implementing the data flow and classes to broadcast the data
+    - [ ] usable data plotter class 
+    - [ ] Implementing the data plotter class
+    - [ ] Reading or subscribignt to the data stream
+    - [ ] processing of data in the parent class of all the data
+    - [ ] passing data to the child widgets
+    - [ ] Legend in child widgets
+    - [ ] working on ui components, hero elements, light dark mode
+    - [ ] extrapolation or interpolation might try
     - [ ] error handling and stuff
   - [ ] ROCKET LAUNCH SEQUENCE IN RPI
-  - [ ] Wokring on the testing and deployment
-- [ ] 2024-10-20: Finished the project
+  - [ ] Working on the testing and deployment
+- [ ] 2024-10-28: Finished the project

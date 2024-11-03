@@ -9,6 +9,7 @@ import os
 from queue import Queue
 import serial
 import signal
+import json
 import csv ## Might remove this later
 
 
@@ -51,6 +52,7 @@ def populate_csv():
     with open(TEMPPATH, 'w') as file:
         writer = csv.writer(file,lineterminator='\n')
         writer.writerow(['A', 'B', 'C', 'D', 'E'])
+    cnt=0
     for i in range(100):
 
         time.sleep(random.randint(2, 5))
@@ -58,9 +60,9 @@ def populate_csv():
             writer = csv.writer(file,lineterminator='\n')
             
             num = random.randint(1,10)
-            for i in range(1, num):
-                writer.writerow(['A',*[random.randint(1,100) for j in range(4)]])
-
+            for q in range(1, num):
+                cnt+=1
+                writer.writerow([cnt,*[random.randint(1,100) for j in range(4)]])
             # logging.info("Appended {} rows to the csv".format(num-1))
 
 
@@ -74,7 +76,8 @@ SAMAPLINGTIME = SAMAPLINGTIME/1000
 FILEPATH = 'D:/Obfuscation/telemetor/Backend/rocket.csv'
 TEMPPATH = 'D:/Obfuscation/telemetor/Backend/csv-temp/data.csv'
 ROCKETLAUNCH = False
-
+PORT = 12345
+HOST = "127.0.0.1"
 
 class SerialComm:
     def __init__(self, port:str, baudrate:int):
@@ -85,7 +88,7 @@ class SerialComm:
 
 
 class SocketServer:
-    def __init__(self, host="127.0.0.1", port=12345):
+    def __init__(self, host=HOST, port=PORT):
         self.host = host
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -94,7 +97,7 @@ class SocketServer:
         self.connectionflag = False
         logging.info(f"ROCKETLAUNCH STATUS{ROCKETLAUNCH}")
         if ROCKETLAUNCH:
-            self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue)
+            self.dataHandler = DataHandler(filePath=TEMPPATH, queue=bufferQueue,headerrows=1)
     
     def start(self,timeout=None):
         self.server_socket.bind((self.host, self.port))
@@ -108,7 +111,7 @@ class SocketServer:
         accept_thread = threading.Thread(target=self.accept_clients)
         accept_thread.start()
         # accept_thread.join()
-        print("SOME SHITTY STUFFFFFFF IT SHOULD NOT BE PRINT IF IM RIGHT")
+        # temp_thread_to_print_time.join()
 
     ## will edit it or remove it later
     def print_time(self):
@@ -176,22 +179,27 @@ class SocketServer:
             # csvobj = CsvToJson(FILEPATH)
 
             while not ACK_SUCCESS:
-                if retries > 4:
+                if retries > 10:
                     ACK_SUCCESS = False
                     logging.error("Max Retries reached")
                     logging.info("Closing the connection")
                     break
                 data = client_socket.recv(1024).decode('utf-8')
+                logging.info("client send {}".format(data))
                 if data == "ACK-CONNECT":
                     
                     logging.info("Client Connected")
                     client_socket.send("ACK-EXCHANGE".encode('utf-8'))
                     data = client_socket.recv(1024).decode('utf-8')
 
+                    logging.info("client send {}".format(data))
                     if data == "ACK-EXCHANGE":
+
                         headers = "HEADERS{}:TYPES{}".format(self.dataHandler.header, self.dataHandler.state)
                         client_socket.send(headers.encode('utf-8'))
                         data = client_socket.recv(1024).decode('utf-8')
+                        logging.info("client send {}".format(data))
+
 
                         if data == "ACK-COMPLETE":
                             ACK_SUCCESS = True
@@ -280,12 +288,11 @@ class SocketServer:
         while ROCKETLAUNCH and retries < 5: 
             try:
                 data = bufferQueue.get() ## string bascially json data
-                
-                
                 if data !="[]": 
                     #  try lock 
                     logging.info("Sending data to {}".format(client_socket.getpeername()))
                     client_socket.send(f"{data}::ACK({acknum})".encode('utf-8'))
+                    print(data)
                     logging.info("Data Sent")
                     logging.info("Wating for the ACK")
                     try:
@@ -341,7 +348,7 @@ class SocketServer:
 ## Will handle Serial Communitcatino in future
 class DataHandler():
     
-    def __init__(self, filePath=None,ser:serial.Serial=None,queue:Queue=None):
+    def __init__(self, filePath=None,ser:serial.Serial=None,queue:Queue=None,headerrows:int=None):
         assert filePath or ser, "Either file_path or serial port must be provided"
         assert not (filePath and ser), "Only one of file_path or serial port must be provided"
         
@@ -351,7 +358,7 @@ class DataHandler():
         ##
 
 
-
+        self.headerrows = headerrows
         self.file_path = filePath
         self.header = []
         self.data = []
@@ -368,8 +375,8 @@ class DataHandler():
     ## retru mechanism might be needed here or maybe better error manegment
     def parser_csv(self):
         csv_obj = CsvToJson(self.file_path)
-        csv_obj.readCsv(header=True,headerrows=1)
-
+        csv_obj.readCsv(header=True,headerrows=self.headerrows)
+ 
         try:
             self.header = csv_obj.header.headers # The entire header list from row 0 and row 2
             self.state = csv_obj.header.types # b'F' or b'S'
@@ -381,8 +388,9 @@ class DataHandler():
         try:
             while True:
                 data = csv_obj.packet() ## json data 
-                if data !=[]:
-                    self.data_queue.put(data)
+                
+                if data !="[]":
+                    self.data_queue.put(json.loads(data))
                 time.sleep(SAMAPLINGTIME)
         except Exception as e:
             logging.error("There is some error parser_csv {}".format(e))
