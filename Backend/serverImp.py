@@ -52,6 +52,7 @@ def populate_csv():
     with open(TEMPPATH, 'w') as file:
         writer = csv.writer(file,lineterminator='\n')
         writer.writerow(['A', 'B', 'C', 'D', 'E'])
+    cnt=0
     for i in range(100):
 
         time.sleep(random.randint(2, 5))
@@ -60,8 +61,8 @@ def populate_csv():
             
             num = random.randint(1,10)
             for q in range(1, num):
-                writer.writerow([i+q,*[random.randint(1,100) for j in range(4)]])
-
+                cnt+=1
+                writer.writerow([cnt,*[random.randint(1,100) for j in range(4)]])
             # logging.info("Appended {} rows to the csv".format(num-1))
 
 

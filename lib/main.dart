@@ -35,15 +35,6 @@ void main() {
   networkHandler.connect();
 }
 
-Future<void> printvalue() async {
-  while (true) {
-    if (dataQueue.isNotEmpty) {
-      print(dataQueue.removeFirst());
-    }
-    await Future.delayed(Duration(seconds: 1));
-  }
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -193,7 +184,8 @@ class CharMainScreen extends StatelessWidget {
   }
 
   final queue = dataQueue;
-  StreamController<List<int>> streamController = StreamController<List<int>>();
+  final StreamController<List<int>> streamController =
+      StreamController<List<int>>();
 
   @override
   Widget build(BuildContext context) {
@@ -250,10 +242,16 @@ class CharMainScreen extends StatelessWidget {
       if (queue.isNotEmpty) {
         var temp = queue.removeFirst();
         List<int> tempInt = [];
-        RegExp reg = RegExp(r'\b(\d{2})\b');
+        RegExp reg = RegExp(
+            r'\b(\d|\d{2})\b'); // need to change this for any number of digits
         var match = reg.allMatches(temp);
         for (var i in match) {
-          tempInt.add(int.parse(i.group(0)!));
+          try {
+            tempInt.add(int.parse(i.group(1)!));
+          } catch (e) {
+            logger.e('Error in parsing $e');
+            continue;
+          }
         }
         streamController.add(tempInt);
       }
@@ -430,6 +428,7 @@ class _AltitudeChartState extends State<AltitudeChart> {
     super.initState();
     stream = widget.myStream.stream;
     stream.listen((event) {
+      logger.i('Received: ${event}');
       _datapoints.add(FlSpot(event[0].toDouble(), event[1].toDouble()));
       setState(() {});
     });
@@ -599,9 +598,11 @@ class NetworkHandler {
         int? AckNum = int.parse((match1?.group(2))!);
         sendMessage(socket, '::ACK($AckNum)');
         final match2 = reg2.allMatches(dataString!);
-        List<dynamic> dataVal = [];
+        // logger.i('Received: ${match2.}')
         for (var match in match2) {
           dataQueue.add((match.group(1)!));
+          // logger.i(match.group(1));
+          // Future.delayed(Duration(seconds: 1));
         }
       } else {
         final ack = utf8.decode(data);
