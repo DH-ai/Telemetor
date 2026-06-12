@@ -32,9 +32,11 @@ class TelemetorApp extends StatelessWidget {
         Provider<TelemetryHub>.value(value: hub),
         Provider<TelemetryTransport>.value(value: transport),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         title: 'Telemetor',
-        home: HomeScreen(title: 'T E L E M E T O R'),
+        // Placeholder dark theme; full Material 3 light/dark lands in G1-M5.
+        theme: ThemeData.dark(),
+        home: const HomeScreen(title: 'T E L E M E T O R'),
       ),
     );
   }

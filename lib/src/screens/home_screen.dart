@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../charts/altitude_chart.dart';
+import '../charts/telemetry_chart.dart';
 import '../data/telemetry_hub.dart';
 import '../models/telemetry_channel.dart';
 import '../network/telemetry_transport.dart';
@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const _HomeBody(),
+      body: const _ChartGrid(),
       backgroundColor: AppColors.scaffoldBackground,
     );
   }
@@ -68,184 +68,51 @@ class _ConnectionStateIcon extends StatelessWidget {
   }
 }
 
-class _HomeBody extends StatelessWidget {
-  const _HomeBody();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      AspectRatio(
-        aspectRatio: 3 / 10,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.panelBackground,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.panelBackground, width: 2),
-          ),
-          margin: const EdgeInsets.all(10),
-          alignment: Alignment.centerLeft,
-          constraints: const BoxConstraints(minWidth: 200, minHeight: 600),
-          child: const SidePanel(),
-        ),
-      ),
-      Expanded(
-        child: Container(
-          color: AppColors.chartBackground,
-          margin: const EdgeInsets.all(40),
-          child: const ChartGrid(),
-        ),
-      ),
-    ]);
-  }
-}
-
-class SidePanel extends StatelessWidget {
-  const SidePanel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 200, minHeight: 200),
-      child: const Text(
-        'Hello World',
-        style: TextStyle(color: AppColors.accent),
-      ),
-    );
-  }
-}
-
-/// Main chart area: Altitude, Temperature, Velocity, Acceleration and
-/// Gyroscope tiles. Only Temperature plots live data in this prototype;
-/// it follows the second discovered channel (matching the old behavior of
-/// plotting the second column of each row).
-class ChartGrid extends StatelessWidget {
-  const ChartGrid({super.key});
+/// One [TelemetryChart] tile per discovered channel. The fully featured
+/// dashboard (add/remove tiles, layouts, stat tiles) lands in G1-M5.
+class _ChartGrid extends StatelessWidget {
+  const _ChartGrid();
 
   @override
   Widget build(BuildContext context) {
     final hub = context.read<TelemetryHub>();
-    return Column(children: <Widget>[
-      Expanded(
-        flex: 2,
-        child: Row(
-          children: <Widget>[
-            const Expanded(
-              child: AspectRatio(aspectRatio: 16 / 15, child: AltitudeTile()),
+    return ValueListenableBuilder<List<TelemetryChannel>>(
+      valueListenable: hub.channelsNotifier,
+      builder: (context, channels, _) {
+        final named =
+            channels.where((c) => c.name.trim().isNotEmpty).toList();
+        if (named.isEmpty) {
+          return const Center(
+            child: Text(
+              'Waiting for channels…',
+              style: TextStyle(color: AppColors.accent),
             ),
-            Expanded(
-              child: AspectRatio(
-                aspectRatio: 16 / 15,
-                child: ValueListenableBuilder<List<TelemetryChannel>>(
-                  valueListenable: hub.channelsNotifier,
-                  builder: (context, channels, _) {
-                    if (channels.isEmpty) {
-                      return const TemperatureTile(child: SizedBox());
-                    }
-                    final channel =
-                        channels.length > 1 ? channels[1] : channels.first;
-                    return TemperatureTile(
-                      child: AltitudeChart(
-                        key: ValueKey(channel.name),
-                        sampleStream: hub.stream(channel.name),
-                      ),
-                    );
-                  },
-                ),
+          );
+        }
+        return GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 480,
+            mainAxisExtent: 260,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: named.length,
+          itemBuilder: (context, index) {
+            final channel = named[index];
+            return Card(
+              color: AppColors.panelBackground,
+              child: TelemetryChart(
+                key: ValueKey(channel.name),
+                hub: hub,
+                channels: [channel],
+                title: channel.name,
+                unit: channel.unit,
               ),
-            ),
-            const Expanded(
-              child: AspectRatio(aspectRatio: 16 / 15, child: VelocityTile()),
-            ),
-          ],
-        ),
-      ),
-      const Expanded(
-        flex: 3,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: AspectRatio(aspectRatio: 16 / 13, child: GyroscopeTile()),
-            ),
-            Expanded(
-              child:
-                  AspectRatio(aspectRatio: 16 / 13, child: AccelerationTile()),
-            ),
-          ],
-        ),
-      ),
-    ]);
-  }
-}
-
-class AltitudeTile extends StatelessWidget {
-  const AltitudeTile({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        color: Colors.black,
-      ),
-    );
-  }
-}
-
-class TemperatureTile extends StatelessWidget {
-  const TemperatureTile({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      color: Colors.black,
-      child: SizedBox(height: 200, width: 200, child: child),
-    );
-  }
-}
-
-class VelocityTile extends StatelessWidget {
-  const VelocityTile({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      color: Colors.black,
-      child: const SizedBox(height: 200, width: 200),
-    );
-  }
-}
-
-class AccelerationTile extends StatelessWidget {
-  const AccelerationTile({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      color: Colors.black,
-      child: const SizedBox(height: 200, width: 200),
-    );
-  }
-}
-
-class GyroscopeTile extends StatelessWidget {
-  const GyroscopeTile({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      color: Colors.black,
-      child: const SizedBox(
-        height: 200,
-        width: 200,
-        child: Text('Gyroscope'),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }
