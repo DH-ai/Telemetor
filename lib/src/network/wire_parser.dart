@@ -13,6 +13,12 @@ abstract final class WireParser {
   static bool isHeaderPacket(String packet) =>
       _headerPattern.hasMatch(packet);
 
+  /// End offset (exclusive) of the header inside [packet], or -1 when no
+  /// complete header is present. Lets stream buffers consume exactly the
+  /// header and keep whatever follows.
+  static int headerEnd(String packet) =>
+      _headerPattern.firstMatch(packet)?.end ?? -1;
+
   /// Parses the header packet into channels.
   ///
   /// The server sends Python-repr lists. Channel names map onto type tags

@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../charts/altitude_chart.dart';
 import '../data/telemetry_hub.dart';
 import '../models/telemetry_channel.dart';
+import '../network/telemetry_transport.dart';
 import '../theme/app_colors.dart';
+import 'settings_dialog.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.title});
@@ -13,14 +15,55 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final transport = context.read<TelemetryTransport>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.appBarBackground,
         centerTitle: true,
         title: Text(title),
+        actions: [
+          _ConnectionStateIcon(transport: transport),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Connection settings',
+            onPressed: () => ConnectionSettingsDialog.show(context, transport),
+          ),
+        ],
       ),
       body: const _HomeBody(),
       backgroundColor: AppColors.scaffoldBackground,
+    );
+  }
+}
+
+class _ConnectionStateIcon extends StatelessWidget {
+  const _ConnectionStateIcon({required this.transport});
+
+  final TelemetryTransport transport;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<TransportState>(
+      stream: transport.states,
+      initialData: transport.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data ?? TransportState.disconnected;
+        final (icon, color) = switch (state) {
+          TransportState.connected => (Icons.cloud_done, Colors.greenAccent),
+          TransportState.connecting ||
+          TransportState.handshaking ||
+          TransportState.reconnecting =>
+            (Icons.cloud_sync, Colors.amberAccent),
+          TransportState.disconnected => (Icons.cloud_off, Colors.redAccent),
+        };
+        return Tooltip(
+          message: state.name,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Icon(icon, color: color),
+          ),
+        );
+      },
     );
   }
 }
