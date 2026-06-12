@@ -1,13 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 import '../charts/altitude_chart.dart';
-import '../data/data_queue.dart';
+import '../data/telemetry_hub.dart';
+import '../models/telemetry_channel.dart';
 import '../theme/app_colors.dart';
-
-final Logger _logger = Logger();
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.title});
@@ -75,40 +72,15 @@ class SidePanel extends StatelessWidget {
 }
 
 /// Main chart area: Altitude, Temperature, Velocity, Acceleration and
-/// Gyroscope tiles. Only Temperature plots live data in this prototype.
-class ChartGrid extends StatefulWidget {
+/// Gyroscope tiles. Only Temperature plots live data in this prototype;
+/// it follows the second discovered channel (matching the old behavior of
+/// plotting the second column of each row).
+class ChartGrid extends StatelessWidget {
   const ChartGrid({super.key});
 
   @override
-  State<ChartGrid> createState() => _ChartGridState();
-}
-
-class _ChartGridState extends State<ChartGrid> {
-  final StreamController<List<int>> _streamController =
-      StreamController<List<int>>();
-  Timer? _pollTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    // Prototype plumbing: polls the global queue every 2 seconds and pushes
-    // parsed integers to the chart stream. Replaced by event-driven push in
-    // G1-M2.
-    _pollTimer = Timer.periodic(
-      const Duration(seconds: 2),
-      (_) => _drainDataQueue(),
-    );
-  }
-
-  @override
-  void dispose() {
-    _pollTimer?.cancel();
-    _streamController.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final hub = context.read<TelemetryHub>();
     return Column(children: <Widget>[
       Expanded(
         flex: 2,
@@ -120,7 +92,22 @@ class _ChartGridState extends State<ChartGrid> {
             Expanded(
               child: AspectRatio(
                 aspectRatio: 16 / 15,
-                child: TemperatureTile(dataStream: _streamController.stream),
+                child: ValueListenableBuilder<List<TelemetryChannel>>(
+                  valueListenable: hub.channelsNotifier,
+                  builder: (context, channels, _) {
+                    if (channels.isEmpty) {
+                      return const TemperatureTile(child: SizedBox());
+                    }
+                    final channel =
+                        channels.length > 1 ? channels[1] : channels.first;
+                    return TemperatureTile(
+                      child: AltitudeChart(
+                        key: ValueKey(channel.name),
+                        sampleStream: hub.stream(channel.name),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             const Expanded(
@@ -145,20 +132,6 @@ class _ChartGridState extends State<ChartGrid> {
       ),
     ]);
   }
-
-  void _drainDataQueue() {
-    if (dataQueue.isEmpty) return;
-    final raw = dataQueue.removeFirst();
-    final values = <int>[];
-    for (final match in RegExp(r'\b(\d|\d{2})\b').allMatches(raw)) {
-      try {
-        values.add(int.parse(match.group(1)!));
-      } catch (e) {
-        _logger.e('Error in parsing $e');
-      }
-    }
-    _streamController.add(values);
-  }
 }
 
 class AltitudeTile extends StatelessWidget {
@@ -177,20 +150,16 @@ class AltitudeTile extends StatelessWidget {
 }
 
 class TemperatureTile extends StatelessWidget {
-  const TemperatureTile({super.key, required this.dataStream});
+  const TemperatureTile({super.key, required this.child});
 
-  final Stream<List<int>> dataStream;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(10),
       color: Colors.black,
-      child: SizedBox(
-        height: 200,
-        width: 200,
-        child: AltitudeChart(dataStream: dataStream),
-      ),
+      child: SizedBox(height: 200, width: 200, child: child),
     );
   }
 }

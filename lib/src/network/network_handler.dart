@@ -5,7 +5,8 @@ import 'dart:typed_data';
 
 import 'package:logger/logger.dart';
 
-import '../data/data_queue.dart';
+import '../data/telemetry_hub.dart';
+import 'wire_parser.dart';
 
 final Logger _logger = Logger();
 
@@ -17,13 +18,16 @@ final Logger _logger = Logger();
 ///   server -> HEADERS{...}:TYPES{...}, client -> ACK-COMPLETE
 ///   then data frames `[...]::ACK(n)` answered with `::ACK(n)`.
 ///
-/// Prototype implementation: G1-M3 replaces this with a proper
-/// TelemetryTransport interface with reconnect and error surfacing.
+/// Parsed rows are pushed straight into the [TelemetryHub] (event-driven,
+/// no intermediate queue). Prototype implementation: G1-M3 replaces this
+/// with a proper TelemetryTransport interface with reconnect and error
+/// surfacing.
 class NetworkHandler {
-  NetworkHandler({required this.host, required this.port});
+  NetworkHandler({required this.host, required this.port, required this.hub});
 
   final String host;
   final int port;
+  final TelemetryHub hub;
   bool ackStatus = false;
 
   Future<void> connect() async {
@@ -31,14 +35,14 @@ class NetworkHandler {
       final socket = await Socket.connect(host, port);
       _logger.i(
           'Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
-      await _acknowledge(socket);
+      _listen(socket);
       ackStatus = true;
     } catch (e) {
       _logger.e('Connection failed: $e');
     }
   }
 
-  Future<void> _acknowledge(Socket socket) async {
+  void _listen(Socket socket) {
     var handshakeDone = false;
     String? lastAck;
 
@@ -61,10 +65,14 @@ class NetworkHandler {
     } else if (ack == 'ACK-EXCHANGE') {
       _send(socket, 'ACK-EXCHANGE');
       return ack;
-    } else if (ack.contains('HEAD') && lastAck == 'ACK-EXCHANGE') {
-      final match =
-          RegExp(r'HEADERS\[([^}]+)\]:TYPES\[([^}]+)\]').firstMatch(ack);
-      _logger.i('Headers: ${match?.group(1)}; Types: ${match?.group(2)}');
+    } else if (WireParser.isHeaderPacket(ack) && lastAck == 'ACK-EXCHANGE') {
+      final channels = WireParser.parseHeader(ack);
+      if (channels == null) {
+        _logger.e('Unparseable header packet: $ack');
+        return lastAck;
+      }
+      _logger.i('Discovered channels: ${channels.map((c) => c.name)}');
+      hub.configure(channels);
       _send(socket, 'ACK-COMPLETE');
       onComplete();
       return lastAck;
@@ -74,16 +82,15 @@ class NetworkHandler {
   }
 
   void _handleDataFrame(Socket socket, String frame) {
-    final match = RegExp(r'\[(.*?)\]::ACK\((\d+)\)').firstMatch(frame);
-    final payload = match?.group(1);
-    final ackNum = match?.group(2);
-    if (payload == null || ackNum == null) {
+    final parsed = WireParser.parseDataFrame(frame);
+    if (parsed == null) {
       _logger.e('Malformed data frame: $frame');
       return;
     }
-    _send(socket, '::ACK($ackNum)');
-    for (final row in RegExp(r'\[(.*?)\]').allMatches(payload)) {
-      dataQueue.add(row.group(1)!);
+    _send(socket, '::ACK(${parsed.ackNumber})');
+    for (final row in parsed.rows) {
+      if (row.isEmpty) continue;
+      hub.ingestRow(row.first, row.sublist(1));
     }
   }
 

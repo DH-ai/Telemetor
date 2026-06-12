@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-/// Prototype line chart fed by a stream of parsed data rows.
-/// Replaced by the reusable TelemetryChart in G1-M4.
-class AltitudeChart extends StatefulWidget {
-  const AltitudeChart({super.key, required this.dataStream});
+import '../models/telemetry_sample.dart';
 
-  final Stream<List<int>> dataStream;
+/// Prototype line chart fed by a channel's sample stream; plots value
+/// against sample index. Replaced by the reusable TelemetryChart in G1-M4.
+class AltitudeChart extends StatefulWidget {
+  const AltitudeChart({super.key, required this.sampleStream});
+
+  final Stream<TelemetrySample> sampleStream;
 
   @override
   State<AltitudeChart> createState() => _AltitudeChartState();
@@ -16,7 +18,8 @@ class AltitudeChart extends StatefulWidget {
 
 class _AltitudeChartState extends State<AltitudeChart> {
   final List<FlSpot> _dataPoints = [];
-  StreamSubscription<List<int>>? _subscription;
+  StreamSubscription<TelemetrySample>? _subscription;
+  int _index = 0;
 
   static const double _yMin = 0;
   static const double _yMax = 100;
@@ -26,10 +29,10 @@ class _AltitudeChartState extends State<AltitudeChart> {
   @override
   void initState() {
     super.initState();
-    _subscription = widget.dataStream.listen((event) {
-      if (event.length < 2) return;
+    _subscription = widget.sampleStream.listen((sample) {
       setState(() {
-        _dataPoints.add(FlSpot(event[0].toDouble(), event[1].toDouble()));
+        _dataPoints.add(FlSpot(_index.toDouble(), sample.value));
+        _index++;
       });
     });
   }
