@@ -115,6 +115,23 @@ void main() {
       expect(altAbl.single.value, 86.01);
     });
 
+    test('keeps column alignment across empty-name padding channels',
+        () async {
+      final hub = makeHub();
+      hub.configure(const [
+        TelemetryChannel(name: 'a', type: 'F'),
+        TelemetryChannel(name: '', type: 'F'), // padding column
+        TelemetryChannel(name: 'b', type: 'F'),
+      ]);
+      final b = <TelemetrySample>[];
+      hub.stream('b').listen(b.add);
+
+      hub.ingestRow('F', ['1', '2', '3']);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(b.single.value, 3);
+    });
+
     test('ignores extra values beyond the channel count', () async {
       final hub = makeHub();
       hub.configure(const [TelemetryChannel(name: 'a', type: 'F')]);

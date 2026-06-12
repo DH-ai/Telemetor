@@ -21,17 +21,27 @@ abstract final class WireParser {
 
   /// Parses the header packet into channels.
   ///
-  /// The server sends Python-repr lists. Channel names map onto type tags
-  /// positionally only when the backend provides that mapping; with the
-  /// current frozen protocol the tags identify row groups, so every channel
-  /// gets the single tag when there is one, otherwise tags are matched to
-  /// rows at ingest time via [TelemetryChannel.type] being empty.
+  /// The server concatenates one header row per type tag (minus the tag
+  /// column itself), all rows padded to the same CSV width. With a single
+  /// tag every channel gets it. With several tags the name list is split
+  /// evenly and each segment is assigned its tag positionally, preserving
+  /// empty padding names so that data rows keep their column alignment
+  /// (consumers should hide channels with empty names).
   static List<TelemetryChannel>? parseHeader(String packet) {
     final match = _headerPattern.firstMatch(packet);
     if (match == null) return null;
     final names = _parsePythonList(match.group(1)!);
-    final types = _parsePythonList(match.group(2)!);
+    final types =
+        _parsePythonList(match.group(2)!).where((t) => t.isNotEmpty).toList();
     if (names.isEmpty) return null;
+
+    if (types.length > 1 && names.length % types.length == 0) {
+      final groupSize = names.length ~/ types.length;
+      return [
+        for (var i = 0; i < names.length; i++)
+          TelemetryChannel(name: names[i], type: types[i ~/ groupSize]),
+      ];
+    }
     final singleType = types.length == 1 ? types.first : '';
     return [
       for (final name in names)
@@ -58,11 +68,13 @@ abstract final class WireParser {
 
   /// Parses `'a', "b", c` into `[a, b, c]`, stripping quotes and whitespace.
   /// Items like `b'F'` keep their full form (`b'F'`) so tags stay distinct.
+  /// Empty items are preserved (as empty strings) so positional column
+  /// alignment with data rows survives padded CSV columns.
   static List<String> _parsePythonList(String inner) {
+    if (inner.trim().isEmpty) return const [];
     final items = <String>[];
     for (var item in inner.split(',')) {
       item = item.trim();
-      if (item.isEmpty) continue;
       if (item.length >= 2 &&
           ((item.startsWith("'") && item.endsWith("'")) ||
               (item.startsWith('"') && item.endsWith('"')))) {

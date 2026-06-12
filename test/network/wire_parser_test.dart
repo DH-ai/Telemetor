@@ -12,14 +12,33 @@ void main() {
       expect(channels.every((c) => c.type == 'A'), isTrue);
     });
 
-    test('parses a multi-group rocket-style header', () {
+    test('splits a multi-group rocket-style header evenly across tags', () {
+      // Two header rows of equal CSV width (incl. padding columns).
+      const packet = 'HEADERS[\' time\', \' alt\', \'\', '
+          '\'lat(deg)\', \'lon(deg)\', \'\']:TYPES["b\'F\'", "b\'S\'"]';
+      final channels = WireParser.parseHeader(packet)!;
+
+      expect(channels.length, 6);
+      expect(channels.map((c) => c.name),
+          ['time', 'alt', '', 'lat(deg)', 'lon(deg)', '']);
+      expect(channels.map((c) => c.type), [
+        "b'F'", "b'F'", "b'F'", // first segment
+        "b'S'", "b'S'", "b'S'", // second segment
+      ]);
+    });
+
+    test('leaves types empty when groups cannot be split evenly', () {
       const packet =
           'HEADERS[\' time\', \' state\', \'lat(deg)\']:TYPES["b\'F\'", "b\'S\'"]';
       final channels = WireParser.parseHeader(packet)!;
       expect(channels.map((c) => c.name), ['time', 'state', 'lat(deg)']);
-      // With several groups the positional mapping is unknown at header
-      // time, so the type tag is left empty.
       expect(channels.every((c) => c.type == ''), isTrue);
+    });
+
+    test('preserves empty padding names for column alignment', () {
+      const packet = "HEADERS['a', '', 'b']:TYPES['A']";
+      final channels = WireParser.parseHeader(packet)!;
+      expect(channels.map((c) => c.name), ['a', '', 'b']);
     });
 
     test('returns null for non-header packets', () {

@@ -65,6 +65,9 @@ class TelemetryHub {
     final time = timestamp ?? _clock();
     final count = values.length < group.length ? values.length : group.length;
     for (var i = 0; i < count; i++) {
+      // Padding columns have empty names; skip them but keep the index
+      // alignment between values and channels.
+      if (group[i].name.trim().isEmpty) continue;
       final value = double.tryParse(values[i].trim());
       if (value == null) continue;
       _emit(group[i].name, TelemetrySample(timestamp: time, value: value));
