@@ -13,9 +13,11 @@ import signal
 import sys
 import threading
 
+from api import ApiServer, SessionInfo, create_app
 from broadcaster import Broadcaster
 from csv_source import CsvReplaySource
 from socket_server import TelemetryServer
+from telemetry_store import TelemetryStore
 
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_HOST = '127.0.0.1'
@@ -23,6 +25,7 @@ DEFAULT_PORT = 12345
 DEFAULT_CSV = os.path.join(BACKEND_DIR, 'rocket.csv')
 DEFAULT_RATE_HZ = 50.0
 DEFAULT_HEADER_ROWS = 2
+DEFAULT_API_PORT = 8000
 
 logger = logging.getLogger('serverImp')
 
@@ -43,6 +46,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
                              f'{DEFAULT_HEADER_ROWS})')
     parser.add_argument('--loop', action='store_true',
                         help='restart the replay when the file ends')
+    parser.add_argument('--api-port', type=int, default=DEFAULT_API_PORT,
+                        help=f'REST API port (default {DEFAULT_API_PORT}, '
+                             f'0 disables the API)')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='enable DEBUG logging (per-frame chatter)')
     return parser
@@ -71,6 +77,17 @@ def main(argv=None) -> int:
     server = TelemetryServer(args.host, args.port, broadcaster,
                              headers=source.headers, types=source.types,
                              shutdown=shutdown)
+
+    api_server = None
+    if args.api_port:
+        store = TelemetryStore(source.headers, source.types)
+        broadcaster.add_listener(store.ingest_row)
+        app = create_app(store, server, source, SessionInfo())
+        api_server = ApiServer(app, host=args.host, port=args.api_port)
+        api_server.start()
+        logger.info("REST API on http://%s:%d (docs at /docs)",
+                    args.host, args.api_port)
+
     server.start()
     source.start(broadcaster, shutdown)
 
@@ -79,6 +96,8 @@ def main(argv=None) -> int:
             shutdown.wait(0.5)
     finally:
         server.stop()
+        if api_server is not None:
+            api_server.stop()
         source.join(timeout=5)
         logger.info("bye")
     return 0
