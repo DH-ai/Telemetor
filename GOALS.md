@@ -19,19 +19,31 @@ Work happens on branch `v2`. One commit per milestone, message `G<goal>-M<n>: <s
 - **Storage/replay (Goal 3)**: append-only JSONL session files (one timestamped sample
   per line) — replay = read + playback clock. SQLite/drift only if query needs appear.
 - **State management**: plain `Stream`/`ValueNotifier` + `provider`. No bloc/riverpod.
+- **Backend API**: FastAPI + uvicorn (async, typed, free OpenAPI docs), run in a thread
+  beside the socket server. Tests with pytest + httpx. History served from an in-memory
+  ring buffer (last N samples per channel) — disk persistence is Goal 3, not here.
+- **Wire protocol**: the TCP+ACK protocol is frozen for Goal 1 (the Dart client depends
+  on it). Backend efficiency work must stay wire-compatible; protocol redesign is Goal 2.
 
-## Goal 1 — Frontend rebuild (CURRENT)
+## Goal 1 — Frontend rebuild + backend cleanup & REST API (CURRENT)
 
 Today `lib/main.dart` is a 707-line prototype: placeholder widgets, one hardcoded chart,
-a 2 s polling loop, dead code. Rebuild the Flutter side properly. Backend (`Backend/serverImp.py`
-+ `Backend/rocket.csv`) is the test harness — do not rewrite it in this goal.
+a 2 s polling loop, dead code. The Python backend streams data but has hardcoded Windows
+paths (`D:/...` — won't run on Linux), a shared-queue multi-client bug, `retires` typos,
+a hard `serial` import, and no REST API. Rebuild the Flutter side properly; make the
+backend correct, efficient, and complete its REST API — without changing the wire protocol.
 
 **Test gate**: `python Backend/serverImp.py` + `flutter run -d linux` → live dashboard
 shows all CSV channels graphing in real time; add/remove/resize graphs; light/dark mode;
-`flutter analyze` clean; `flutter test` passes.
+two clients connected at once both receive the full stream; `curl localhost:8000/latest`
+returns current values; `flutter analyze` clean; `flutter test` and `pytest Backend/` pass.
 
 ### Milestones
 
+- **G1-M0 Backend runs on Linux**: replace hardcoded `D:/...` paths with paths resolved
+  relative to `Backend/`; fix `retires`→`retries` typos; make `serial` a lazy/optional
+  import; add `Backend/requirements.txt`; verify the server starts and streams on this
+  machine. No protocol or structural changes.
 - **G1-M1 Restructure**: split `main.dart` into `lib/src/{models,network,data,charts,screens,theme}/`.
   Delete dead code (`temp.dart`, `temp-server.dart`, commented blocks, debug prints).
   Behavior unchanged. `flutter analyze` clean.
@@ -57,6 +69,22 @@ shows all CSV channels graphing in real time; add/remove/resize graphs; light/da
   fix what breaks; perf pass (const ctors, no rebuild storms — verify with DevTools
   rebuild stats if available, otherwise by code review); update `REAMDME.md` → rename to
   `README.md` with run instructions; update `PLAN.md` checkboxes.
+- **G1-M7 Backend efficiency & correctness** (wire-compatible — the M3 Dart client must
+  keep working unchanged): per-client fan-out queues so N clients each get the full
+  stream (fixes the documented shared-queue inconsistency); thread-safe shutdown on
+  SIGINT/SIGTERM (close clients, join threads, no orphan daemons); blocking queue gets
+  instead of sleep-polling loops; host/port/csv-path/sample-rate via argparse with the
+  current values as defaults; replace the per-row stop-and-wait send with batched rows
+  per ACK frame (the frame format already supports multiple `[...]` groups); proper log
+  levels (packet-level chatter → DEBUG); split `serverImp.py` into modules if it helps,
+  keep entry point `python Backend/serverImp.py`. Unit tests for the fan-out and parser.
+- **G1-M8 REST API**: `Backend/api.py`, FastAPI on port 8000, fed by an in-memory ring
+  buffer (last ~10k samples per channel) that the data thread populates alongside the
+  socket stream. Endpoints: `GET /latest` (newest sample per channel), `GET /history?
+  channel=&start=&end=&limit=` (from ring buffer), `GET /devices` (connected sources +
+  client count), `GET /session` (current session id, start time, channels, sample rate,
+  packet/drop counts). JSON responses, OpenAPI docs at `/docs`, pytest+httpx tests for
+  every endpoint.
 
 ## Goal 2 — Transport & config
 
