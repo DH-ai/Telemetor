@@ -27,7 +27,6 @@ class Header:
             logging.info("Header created Headers{} Types{}".format(self.headers,self.types))
         
         
-file_path = "D:/Obfuscation/telemetor/Backend/csv-temp/data.csv"
 ## Main csv to json converter class 
 class  CsvToJson:
     def __init__(self, file_path=None,data:Union[dict,list]=None):

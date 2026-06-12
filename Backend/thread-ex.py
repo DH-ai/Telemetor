@@ -1,8 +1,11 @@
 import threading
 import csvtojson
 import csv
+import os
 import random
 import time
+
+DATA_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'csv-temp', 'data.csv')
 
 """
     ToDo 
@@ -16,13 +19,13 @@ import time
 
 
 def populate_csv():
-    with open('D:/Obfuscation/telemetor/Backend/csv-temp/data.csv', 'w') as file:
+    with open(DATA_CSV, 'w') as file:
         writer = csv.writer(file,lineterminator='\n')
         writer.writerow(['A', 'B', 'C', 'D', 'E'])
     for i in range(100):
 
         time.sleep(random.randint(2, 5))
-        with open('D:/Obfuscation/telemetor/Backend/csv-temp/data.csv', 'a') as file:
+        with open(DATA_CSV, 'a') as file:
             writer = csv.writer(file,lineterminator='\n')
             
             num = random.randint(1,10)
@@ -38,7 +41,7 @@ def read_csv():
     time.sleep(3)
     try:
         
-        csv_obj = csvtojson.CsvToJson('D:/Obfuscation/telemetor/Backend/csv-temp/data.csv')
+        csv_obj = csvtojson.CsvToJson(DATA_CSV)
         csv_obj.readCsv(header=True,headerrows=1)
         while True:
             time.sleep(1)

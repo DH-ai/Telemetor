@@ -7,7 +7,6 @@ import logging
 import sys
 import os
 from queue import Queue
-import serial
 import signal
 import json
 import csv ## Might remove this later
@@ -73,14 +72,16 @@ def populate_csv():
 
 SAMAPLINGTIME = 100   #100ms
 SAMAPLINGTIME = SAMAPLINGTIME/1000
-FILEPATH = 'D:/Obfuscation/telemetor/Backend/rocket.csv'
-TEMPPATH = 'D:/Obfuscation/telemetor/Backend/csv-temp/data.csv'
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+FILEPATH = os.path.join(BACKEND_DIR, 'rocket.csv')
+TEMPPATH = os.path.join(BACKEND_DIR, 'csv-temp', 'data.csv')
 ROCKETLAUNCH = False
 PORT = 12345
 HOST = "127.0.0.1"
 
 class SerialComm:
     def __init__(self, port:str, baudrate:int):
+        import serial  # optional dependency, only needed for serial sources
         self.port = port
         self.baudrate = baudrate
         self.ser = serial.Serial(port, baudrate)
@@ -320,13 +321,13 @@ class SocketServer:
             except socket.timeout as e:
                 logging.error(f"Timeout Occured for client {client_socket.getpeername()}")
                 logging.info("Retrying......")
-                retires += 1
+                retries += 1
 
                 time.sleep(1)
             except Exception as e:
                 logging.error("Unable to send data due to {}".format(e)) ## need to change the error message
                 logging.info("Retrying......")
-                retires += 1
+                retries += 1
 
                 time.sleep(1)
 
@@ -348,7 +349,7 @@ class SocketServer:
 ## Will handle Serial Communitcatino in future
 class DataHandler():
     
-    def __init__(self, filePath=None,ser:serial.Serial=None,queue:Queue=None,headerrows:int=None):
+    def __init__(self, filePath=None,ser=None,queue:Queue=None,headerrows:int=None):
         assert filePath or ser, "Either file_path or serial port must be provided"
         assert not (filePath and ser), "Only one of file_path or serial port must be provided"
         
