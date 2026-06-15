@@ -1,4 +1,5 @@
 import csv
+import os
 import pandas as pd
 import time 
 import socket
@@ -17,7 +18,7 @@ def parse_csv(file_path):
         data = list(reader)
     return data
 
-file_path = 'D:/Obfuscation/telemetor/Backend/rocket.csv'
+file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rocket.csv')
 
 if __name__ == '__main__':
   
