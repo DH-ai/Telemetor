@@ -8,7 +8,7 @@ import 'src/data/transport_hub_binding.dart';
 import 'src/network/tcp_ack_transport.dart';
 import 'src/network/telemetry_transport.dart';
 import 'src/screens/dashboard_screen.dart';
-import 'src/theme/app_theme.dart';
+import 'telemetor_ui/telemetor_ui.dart';
 
 const String defaultSocketHost = '127.0.0.1';
 const int defaultSocketPort = 12345;
@@ -59,8 +59,8 @@ class _TelemetorAppState extends State<TelemetorApp> {
         valueListenable: _themeMode,
         builder: (context, mode, _) => MaterialApp(
           title: 'Telemetor',
-          theme: buildLightTheme(),
-          darkTheme: buildDarkTheme(),
+          theme: buildTDLTheme(TDLThemeMode.lightOperations),
+          darkTheme: buildTDLTheme(TDLThemeMode.darkMission),
           themeMode: mode,
           home: DashboardScreen(themeMode: _themeMode),
         ),

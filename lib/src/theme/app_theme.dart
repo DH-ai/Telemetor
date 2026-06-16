@@ -1,20 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Teal seed carried over from the original prototype accent color.
-const Color kSeedColor = Color(0xff1ccc9d);
+import '../../telemetor_ui/telemetor_ui.dart';
 
-ThemeData buildLightTheme() => ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: kSeedColor,
-        brightness: Brightness.light,
-      ),
-    );
+/// Legacy entry points — prefer importing [telemetor_ui] directly.
+ThemeData buildLightTheme() => buildTDLTheme(TDLThemeMode.lightOperations);
 
-ThemeData buildDarkTheme() => ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: kSeedColor,
-        brightness: Brightness.dark,
-      ),
-    );
+ThemeData buildDarkTheme() => buildTDLTheme(TDLThemeMode.darkMission);
