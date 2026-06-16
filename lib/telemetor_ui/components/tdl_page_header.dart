@@ -38,31 +38,53 @@ class TDLPageHeader extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title.toUpperCase(), style: text.pageTitle),
+                  Text(
+                    title.toUpperCase(),
+                    style: text.pageTitle,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (breadcrumb != null)
                     Text(
                       breadcrumb!.toUpperCase(),
                       style: text.caption,
+                      overflow: TextOverflow.ellipsis,
                     ),
                 ],
               ),
             ),
-            TDLLiveBadge(active: live),
-            TDLSpacing.w(TDLSpacing.xl),
-            PanelRow(
-              gap: TDLSpacing.lg,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                for (final metric in metrics)
-                  _MetricChip(label: metric.label, value: metric.value),
-              ],
-            ),
-            TDLSpacing.w(TDLSpacing.lg),
-            Container(width: 1, height: TDLSpacing.xl, color: colors.borderSecondary),
-            TDLSpacing.w(TDLSpacing.sm),
-            PanelRow(
-              gap: TDLSpacing.xs,
-              children: actions,
+            Flexible(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TDLLiveBadge(active: live),
+                    TDLSpacing.w(TDLSpacing.lg),
+                    PanelRow(
+                      gap: TDLSpacing.lg,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        for (final metric in metrics)
+                          _MetricChip(
+                            label: metric.label,
+                            value: metric.value,
+                          ),
+                      ],
+                    ),
+                    TDLSpacing.w(TDLSpacing.lg),
+                    Container(
+                      width: 1,
+                      height: TDLSpacing.xl,
+                      color: colors.borderSecondary,
+                    ),
+                    TDLSpacing.w(TDLSpacing.sm),
+                    PanelRow(
+                      gap: TDLSpacing.xs,
+                      children: actions,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

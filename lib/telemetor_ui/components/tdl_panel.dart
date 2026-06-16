@@ -14,6 +14,7 @@ class TDLPanel extends StatelessWidget {
     this.padding,
     this.selected = false,
     this.alert = false,
+    this.expandChild = false,
   });
 
   final Widget child;
@@ -22,6 +23,10 @@ class TDLPanel extends StatelessWidget {
   final EdgeInsets? padding;
   final bool selected;
   final bool alert;
+
+  /// When true, the child expands to fill remaining vertical space inside a
+  /// bounded flex parent (e.g. [Expanded] in a bottom-row panel).
+  final bool expandChild;
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +42,17 @@ class TDLPanel extends StatelessWidget {
               )
             : TDLBorders.panelDecoration(colors);
 
+    final body = Padding(
+      padding: padding ?? TDLSpacing.panel,
+      child: child,
+    );
+
     return DecoratedBox(
       decoration: decoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize:
+            expandChild ? MainAxisSize.max : MainAxisSize.min,
         children: [
           if (title != null)
             Container(
@@ -63,10 +74,7 @@ class TDLPanel extends StatelessWidget {
                 ],
               ),
             ),
-          Padding(
-            padding: padding ?? TDLSpacing.panel,
-            child: child,
-          ),
+          if (expandChild) Expanded(child: body) else body,
         ],
       ),
     );

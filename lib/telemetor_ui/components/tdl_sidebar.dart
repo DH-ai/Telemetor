@@ -53,67 +53,76 @@ class TDLSidebar extends StatelessWidget {
 
     return ColoredBox(
       color: colors.surface,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TDLSpacing.lg,
-              TDLSpacing.xl,
-              TDLSpacing.lg,
-              TDLSpacing.lg,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: TDLSpacing.xl,
-                  height: TDLSpacing.xl,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: colors.accent),
-                  ),
-                  child: CustomPaint(
-                    painter: _WaveformIconPainter(color: colors.accent),
-                  ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Skip layout during the first-frame size negotiation on Linux.
+          if (!constraints.maxHeight.isFinite || constraints.maxHeight < 64) {
+            return const SizedBox.expand();
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TDLSpacing.lg,
+                  TDLSpacing.xl,
+                  TDLSpacing.lg,
+                  TDLSpacing.lg,
                 ),
-                TDLSpacing.w(TDLSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('TELEMETOR', style: text.navItemActive),
-                      Text(versionLabel, style: text.monoSmall),
-                    ],
-                  ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: TDLSpacing.xl,
+                      height: TDLSpacing.xl,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: colors.accent),
+                      ),
+                      child: CustomPaint(
+                        painter: _WaveformIconPainter(color: colors.accent),
+                      ),
+                    ),
+                    TDLSpacing.w(TDLSpacing.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('TELEMETOR', style: text.navItemActive),
+                          Text(versionLabel, style: text.monoSmall),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          Container(height: 1, color: colors.borderSecondary),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                for (final section in sections) ...[
-                  TDLNavSection(label: section.label),
-                  PanelColumn(
-                    gap: TDLSpacing.none,
-                    children: [
-                      for (final dest in section.destinations)
-                        TDLNavItem(
-                          label: dest.label,
-                          selected: dest.id == selectedId,
-                          enabled: dest.enabled,
-                          onTap: () => onSelected(dest.id),
-                        ),
+              ),
+              Container(height: 1, color: colors.borderSecondary),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    for (final section in sections) ...[
+                      TDLNavSection(label: section.label),
+                      PanelColumn(
+                        gap: TDLSpacing.none,
+                        children: [
+                          for (final dest in section.destinations)
+                            TDLNavItem(
+                              label: dest.label,
+                              selected: dest.id == selectedId,
+                              enabled: dest.enabled,
+                              onTap: () => onSelected(dest.id),
+                            ),
+                        ],
+                      ),
                     ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Container(height: 1, color: colors.borderSecondary),
-          if (footer != null) footer!,
-        ],
+                  ],
+                ),
+              ),
+              Container(height: 1, color: colors.borderSecondary),
+              if (footer != null) footer!,
+            ],
+          );
+        },
       ),
     );
   }

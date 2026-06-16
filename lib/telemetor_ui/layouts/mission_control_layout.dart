@@ -33,7 +33,10 @@ class MissionControlLayout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(width: TDLLayout.sidebarWidth, child: sidebar),
+          SizedBox(
+            width: TDLLayout.sidebarWidth,
+            child: SizedBox.expand(child: sidebar),
+          ),
           Container(width: 1, color: colors.borderSecondary),
           Expanded(
             child: Column(
@@ -48,7 +51,10 @@ class MissionControlLayout extends StatelessWidget {
           ),
           if (rightRail != null) ...[
             Container(width: 1, color: colors.borderSecondary),
-            SizedBox(width: TDLLayout.rightRailWidth, child: rightRail),
+            SizedBox(
+              width: TDLLayout.rightRailWidth,
+              child: SizedBox.expand(child: rightRail),
+            ),
           ],
         ],
       ),

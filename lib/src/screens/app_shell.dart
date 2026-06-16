@@ -7,6 +7,7 @@ import '../data/stream_stats.dart';
 import '../network/telemetry_transport.dart';
 import '../navigation/app_routes.dart';
 import 'add_chart_dialog.dart';
+import 'dashboard_right_rail.dart';
 import 'dashboard_screen.dart';
 import 'settings_dialog.dart';
 
@@ -154,6 +155,9 @@ class _AppShellState extends State<AppShell> {
         },
       ),
       body: _buildBody(context),
+      rightRail: _route == AppRoutes.dashboard
+          ? const DashboardRightRail()
+          : null,
       footer: StatusStrip(
         leading: ValueListenableBuilder<int>(
           valueListenable: stats.droppedFrames,

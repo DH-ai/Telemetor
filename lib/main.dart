@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'src/data/dashboard_controller.dart';
+import 'src/data/notification_feed.dart';
+import 'src/data/session_tracker.dart';
 import 'src/data/stream_stats.dart';
 import 'src/data/telemetry_hub.dart';
 import 'src/data/transport_hub_binding.dart';
@@ -37,12 +39,17 @@ class _TelemetorAppState extends State<TelemetorApp> {
   late final DashboardController _dashboard =
       DashboardController(hub: widget.hub);
   late final StreamStats _stats = StreamStats(widget.transport);
+  late final SessionTracker _session = SessionTracker(widget.transport);
+  late final NotificationFeed _notifications =
+      NotificationFeed(widget.transport);
 
   @override
   void dispose() {
     _themeMode.dispose();
     _dashboard.dispose();
     _stats.dispose();
+    _session.dispose();
+    _notifications.dispose();
     super.dispose();
   }
 
@@ -53,6 +60,8 @@ class _TelemetorAppState extends State<TelemetorApp> {
         Provider<TelemetryHub>.value(value: widget.hub),
         Provider<TelemetryTransport>.value(value: widget.transport),
         Provider<StreamStats>.value(value: _stats),
+        Provider<SessionTracker>.value(value: _session),
+        ChangeNotifierProvider<NotificationFeed>.value(value: _notifications),
         ChangeNotifierProvider<DashboardController>.value(value: _dashboard),
       ],
       child: ValueListenableBuilder<ThemeMode>(

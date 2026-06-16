@@ -8,6 +8,7 @@ import '../data/telemetry_hub.dart';
 import '../models/telemetry_channel.dart';
 import '../models/telemetry_sample.dart';
 import 'add_chart_dialog.dart';
+import 'dashboard_bottom_row.dart';
 
 /// Dashboard content pane — rendered inside [AppShell].
 class DashboardScreen extends StatelessWidget {
@@ -18,46 +19,53 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<DashboardController>();
+    final fullscreen = controller.fullscreenTile != null;
 
     return MissionControlBody(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
-          const _StatTileStrip(),
+          if (!fullscreen) const _MetricStrip(),
           Expanded(
-            child: controller.fullscreenTile != null
+            child: fullscreen
                 ? _FullscreenTile(
                     controller: controller,
                     tile: controller.fullscreenTile!,
                   )
                 : _TileGrid(controller: controller),
           ),
+          if (!fullscreen)
+            const Flexible(
+              fit: FlexFit.loose,
+              child: DashboardBottomRow(),
+            ),
         ],
       ),
     );
   }
 }
 
-/// Horizontal strip of latest-value tiles, one per discovered channel.
-class _StatTileStrip extends StatelessWidget {
-  const _StatTileStrip();
+/// Top row of key metrics (up to five channels).
+class _MetricStrip extends StatelessWidget {
+  const _MetricStrip();
 
   @override
   Widget build(BuildContext context) {
     final hub = context.read<TelemetryHub>();
+    final colors = context.tdlColors;
+
     return ValueListenableBuilder<List<TelemetryChannel>>(
       valueListenable: hub.channelsNotifier,
       builder: (context, channels, _) {
         final named =
-            channels.where((c) => c.name.trim().isNotEmpty).toList();
+            channels.where((c) => c.name.trim().isNotEmpty).take(5).toList();
         if (named.isEmpty) return const SizedBox.shrink();
+
         return Container(
           decoration: BoxDecoration(
-            border: Border(
-              bottom: TDLBorders.divider(context.tdlColors),
-            ),
+            border: Border(bottom: TDLBorders.divider(colors)),
           ),
-          height: 72,
+          height: 88,
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(
               TDLSpacing.lg,
@@ -68,8 +76,10 @@ class _StatTileStrip extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemCount: named.length,
             separatorBuilder: (_, __) => TDLSpacing.w(TDLSpacing.sm),
-            itemBuilder: (context, index) =>
-                _StatTile(channel: named[index], hub: hub),
+            itemBuilder: (context, index) => _MetricCard(
+              channel: named[index],
+              hub: hub,
+            ),
           ),
         );
       },
@@ -77,47 +87,26 @@ class _StatTileStrip extends StatelessWidget {
   }
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile({required this.channel, required this.hub});
+class _MetricCard extends StatelessWidget {
+  const _MetricCard({required this.channel, required this.hub});
 
   final TelemetryChannel channel;
   final TelemetryHub hub;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.tdlColors;
-    final text = context.tdlText;
-
-    return TDLPanel(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TDLSpacing.lg,
-        vertical: TDLSpacing.sm,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(channel.name.toUpperCase(), style: text.metricLabel),
-          ValueListenableBuilder<TelemetrySample?>(
-            valueListenable: hub.latest(channel.name),
-            builder: (context, sample, _) => Text(
-              sample == null
-                  ? '—'
-                  : '${_formatValue(sample.value)}'
-                      '${channel.unit.isEmpty ? '' : ' ${channel.unit}'}',
-              style: text.metricValue.copyWith(color: colors.textPrimary),
-            ),
-          ),
-        ],
-      ),
+    return ValueListenableBuilder<TelemetrySample?>(
+      valueListenable: hub.latest(channel.name),
+      builder: (context, sample, _) {
+        return TelemetryMetric(
+          label: channel.name,
+          value: sample == null
+              ? '—'
+              : formatTelemetryValue(sample.value),
+          unit: channel.unit.isEmpty ? null : channel.unit,
+        );
+      },
     );
-  }
-
-  String _formatValue(double value) {
-    if (value == value.roundToDouble() && value.abs() < 1e9) {
-      return value.toInt().toString();
-    }
-    return value.toStringAsFixed(2);
   }
 }
 
@@ -150,19 +139,19 @@ class _TileGrid extends StatelessWidget {
       DashboardLayout.single =>
         const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 1,
-          mainAxisExtent: 320,
+          mainAxisExtent: 280,
           crossAxisSpacing: TDLSpacing.md,
           mainAxisSpacing: TDLSpacing.md,
         ),
       DashboardLayout.dual => const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisExtent: 300,
+          mainAxisExtent: 260,
           crossAxisSpacing: TDLSpacing.md,
           mainAxisSpacing: TDLSpacing.md,
         ),
       DashboardLayout.grid => const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 480,
-          mainAxisExtent: 260,
+          mainAxisExtent: 220,
           crossAxisSpacing: TDLSpacing.md,
           mainAxisSpacing: TDLSpacing.md,
         ),
@@ -219,7 +208,8 @@ class _ChartTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     tile.title.toUpperCase(),
-                    style: text.sectionTitle.copyWith(color: colors.textPrimary),
+                    style:
+                        text.sectionTitle.copyWith(color: colors.textPrimary),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
