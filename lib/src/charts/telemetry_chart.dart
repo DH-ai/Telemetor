@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../telemetor_ui/telemetor_ui.dart';
 
 import '../data/ring_buffer.dart';
 import '../data/telemetry_hub.dart';
@@ -10,25 +11,12 @@ import '../models/telemetry_channel.dart';
 import '../models/telemetry_sample.dart';
 import 'lttb.dart';
 
-/// Default series palette; cycles when there are more series than colors.
-const List<Color> kDefaultChartPalette = [
-  Color(0xff1ccc9d),
-  Color(0xff4f8cff),
-  Color(0xffff7043),
-  Color(0xffba68c8),
-  Color(0xffffd54f),
-  Color(0xff4dd0e1),
-  Color(0xfff06292),
-  Color(0xffaed581),
-];
-
 /// Reusable multi-series live telemetry chart.
 ///
 /// Subscribes to one hub stream per channel, keeps samples in per-series
 /// ring buffers, shows a sliding time window with auto-scaling axes, and
 /// decimates with LTTB so at most [maxPoints] points per series reach
-/// fl_chart. Repaints are throttled to [minRepaintInterval] (default 30 fps)
-/// and isolated behind a [RepaintBoundary].
+/// fl_chart. All visual styling comes from [TDLChartStyle].
 class TelemetryChart extends StatefulWidget {
   const TelemetryChart({
     super.key,
@@ -37,34 +25,23 @@ class TelemetryChart extends StatefulWidget {
     required this.title,
     this.unit = '',
     this.showLegend = true,
-    this.palette = kDefaultChartPalette,
     this.timeWindow = const Duration(seconds: 60),
     this.maxPoints = 2000,
     this.bufferCapacity = 8192,
     this.minRepaintInterval = const Duration(milliseconds: 33),
+    this.enableTouch = true,
   });
 
   final TelemetryHub hub;
-
-  /// Channels plotted as separate series, in palette order.
   final List<TelemetryChannel> channels;
-
   final String title;
   final String unit;
   final bool showLegend;
-  final List<Color> palette;
-
-  /// Width of the sliding x-axis window.
   final Duration timeWindow;
-
-  /// Maximum points per series handed to fl_chart after decimation.
   final int maxPoints;
-
-  /// Raw samples retained per series.
   final int bufferCapacity;
-
-  /// Minimum delay between repaints (default ~30 fps).
   final Duration minRepaintInterval;
+  final bool enableTouch;
 
   @override
   State<TelemetryChart> createState() => _TelemetryChartState();
@@ -114,8 +91,6 @@ class _TelemetryChartState extends State<TelemetryChart> {
     _subscriptions.clear();
   }
 
-  /// Coalesces bursts of samples into at most one repaint per
-  /// [TelemetryChart.minRepaintInterval].
   void _markDirty() {
     _dirty = true;
     if (_repaintTimer?.isActive ?? false) return;
@@ -141,39 +116,51 @@ class _TelemetryChartState extends State<TelemetryChart> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final style = TDLChartStyle.of(context);
     final hasData = _buffers.values.any((b) => b.isNotEmpty);
+    final headerTitle = widget.unit.isEmpty
+        ? widget.title
+        : '${widget.title} (${widget.unit})';
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.unit.isEmpty
-                      ? widget.title
-                      : '${widget.title} (${widget.unit})',
-                  style: theme.textTheme.titleSmall,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (widget.showLegend) _Legend(widget: widget),
-            ],
+        if (headerTitle.isNotEmpty || widget.showLegend)
+          Padding(
+            padding: style.headerPadding,
+            child: Row(
+              children: [
+                if (headerTitle.isNotEmpty)
+                  Expanded(
+                    child: Text(
+                      headerTitle.toUpperCase(),
+                      style: style.titleStyle,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                if (widget.showLegend && widget.channels.length > 1)
+                  TDLChartLegend(
+                    labels: [
+                      for (final c in widget.channels) c.name,
+                    ],
+                    style: style,
+                  ),
+              ],
+            ),
           ),
-        ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 12, 8),
+            padding: style.chartPadding,
             child: RepaintBoundary(
               child: hasData
-                  ? LineChart(_buildChartData(theme), duration: Duration.zero)
+                  ? LineChart(
+                      _buildChartData(style),
+                      duration: Duration.zero,
+                    )
                   : Center(
                       child: Text(
                         'Waiting for data…',
-                        style: theme.textTheme.bodySmall,
+                        style: style.emptyStateStyle,
                       ),
                     ),
             ),
@@ -183,13 +170,14 @@ class _TelemetryChartState extends State<TelemetryChart> {
     );
   }
 
-  LineChartData _buildChartData(ThemeData theme) {
-    // The window ends at the newest visible sample across all series.
+  LineChartData _buildChartData(TDLChartStyle style) {
     var newestMs = 0;
     for (final buffer in _buffers.values) {
       if (buffer.isNotEmpty) {
-        newestMs =
-            math.max(newestMs, buffer[buffer.length - 1].timestamp.millisecondsSinceEpoch);
+        newestMs = math.max(
+          newestMs,
+          buffer[buffer.length - 1].timestamp.millisecondsSinceEpoch,
+        );
       }
     }
     final windowEnd = newestMs / 1000.0;
@@ -199,9 +187,12 @@ class _TelemetryChartState extends State<TelemetryChart> {
     var minY = double.infinity;
     var maxY = double.negativeInfinity;
     final series = <LineChartBarData>[];
+    final labels = <String>[];
+    final seriesColors = <Color>[];
 
     for (var i = 0; i < widget.channels.length; i++) {
-      final buffer = _buffers[widget.channels[i].name];
+      final channel = widget.channels[i];
+      final buffer = _buffers[channel.name];
       if (buffer == null || buffer.isEmpty) continue;
 
       final spots = <FlSpot>[];
@@ -214,13 +205,14 @@ class _TelemetryChartState extends State<TelemetryChart> {
       }
       if (spots.isEmpty) continue;
 
-      series.add(LineChartBarData(
-        spots: lttbDecimate(spots, widget.maxPoints),
-        color: widget.palette[i % widget.palette.length],
-        barWidth: 1.5,
-        isCurved: false,
-        dotData: const FlDotData(show: false),
-      ));
+      labels.add(channel.name);
+      seriesColors.add(style.seriesColor(i));
+      series.add(
+        style.seriesBar(
+          spots: lttbDecimate(spots, widget.maxPoints),
+          colorIndex: i,
+        ),
+      );
     }
 
     if (!minY.isFinite) {
@@ -228,7 +220,6 @@ class _TelemetryChartState extends State<TelemetryChart> {
       maxY = 1;
     }
     if (minY == maxY) {
-      // Flat line: give the axis some height so it renders.
       minY -= 1;
       maxY += 1;
     } else {
@@ -243,69 +234,16 @@ class _TelemetryChartState extends State<TelemetryChart> {
       minY: minY,
       maxY: maxY,
       clipData: const FlClipData.all(),
-      titlesData: FlTitlesData(
-        rightTitles:
-            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            reservedSize: 24,
-            getTitlesWidget: (value, meta) {
-              final secondsAgo =
-                  widget.timeWindow.inMilliseconds / 1000.0 - value;
-              return SideTitleWidget(
-                axisSide: meta.axisSide,
-                child: Text(
-                  '-${secondsAgo.toStringAsFixed(0)}s',
-                  style: theme.textTheme.labelSmall,
-                ),
-              );
-            },
-          ),
-        ),
-        leftTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: true, reservedSize: 44),
-        ),
-      ),
-      gridData: const FlGridData(show: true, drawVerticalLine: false),
-      borderData: FlBorderData(show: false),
-      lineTouchData: const LineTouchData(enabled: false),
+      titlesData: style.titlesData(timeWindow: widget.timeWindow),
+      gridData: style.gridData(),
+      borderData: style.borderData(),
+      lineTouchData: widget.enableTouch
+          ? style.lineTouchData(
+              seriesLabels: labels,
+              seriesColors: seriesColors,
+            )
+          : const LineTouchData(enabled: false),
       lineBarsData: series,
-    );
-  }
-}
-
-class _Legend extends StatelessWidget {
-  const _Legend({required this.widget});
-
-  final TelemetryChart widget;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      children: [
-        for (var i = 0; i < widget.channels.length; i++)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: widget.palette[i % widget.palette.length],
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                widget.channels[i].name,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-            ],
-          ),
-      ],
     );
   }
 }

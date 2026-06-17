@@ -83,6 +83,10 @@ class TelemetryHub {
   ValueNotifier<TelemetrySample?> latest(String channelName) =>
       _latest.putIfAbsent(channelName, () => ValueNotifier(null));
 
+  /// Inject a single sample — used by session replay.
+  void injectSample(String channelName, TelemetrySample sample) =>
+      _emit(channelName, sample);
+
   void _emit(String channelName, TelemetrySample sample) {
     _controllerFor(channelName).add(sample);
     latest(channelName).value = sample;

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../telemetor_ui/telemetor_ui.dart';
+import '../data/session_recorder.dart';
 import '../data/session_tracker.dart';
 import '../data/stream_stats.dart';
 import '../data/telemetry_hub.dart';
 import '../models/telemetry_channel.dart';
 import '../models/telemetry_sample.dart';
 import '../network/telemetry_transport.dart';
+import 'replay_session_dialog.dart';
 
 /// Right-side dashboard rail: channels, status, device, quick actions.
 class DashboardRightRail extends StatelessWidget {
@@ -142,6 +144,7 @@ class _StatusPane extends StatelessWidget {
   Widget build(BuildContext context) {
     final stats = context.read<StreamStats>();
     final session = context.read<SessionTracker>();
+    final recorder = context.watch<SessionRecorder>();
 
     return ValueListenableBuilder<double>(
       valueListenable: stats.rowsPerSecond,
@@ -173,6 +176,16 @@ class _StatusPane extends StatelessWidget {
                           label: 'Session ID',
                           value: sessionId,
                         ),
+                        if (recorder.isRecording)
+                          TelemetryStatusRow(
+                            label: 'Recording',
+                            value: '${recorder.bufferedSampleCount} samples',
+                          ),
+                        if (recorder.isReplaying)
+                          const TelemetryStatusRow(
+                            label: 'Replay',
+                            value: 'ACTIVE',
+                          ),
                       ],
                     );
                   },
@@ -235,31 +248,58 @@ class _ActionsPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final recorder = context.watch<SessionRecorder>();
+
     return TelemetryQuickActions(
       actions: [
         TelemetryAction(
-          label: 'Start Recording',
-          icon: Icons.fiber_manual_record,
+          label: recorder.isRecording ? 'Stop Recording' : 'Start Recording',
+          icon: recorder.isRecording ? Icons.stop : Icons.fiber_manual_record,
           primary: true,
-          onPressed: () => _toast(context, 'Recording not yet implemented'),
+          onPressed: () => _toggleRecording(context, recorder),
         ),
         TelemetryAction(
-          label: 'Replay Session',
-          icon: Icons.play_arrow,
-          onPressed: () => _toast(context, 'Replay not yet implemented'),
+          label: recorder.isReplaying ? 'Stop Replay' : 'Replay Session',
+          icon: recorder.isReplaying ? Icons.stop : Icons.play_arrow,
+          onPressed: () {
+            if (recorder.isReplaying) {
+              recorder.stopReplay();
+            } else {
+              ReplaySessionDialog.show(context);
+            }
+          },
         ),
         TelemetryAction(
           label: 'Export CSV',
           icon: Icons.download,
-          onPressed: () => _toast(context, 'Export not yet implemented'),
+          onPressed: () => _export(context, recorder),
         ),
       ],
     );
   }
 
-  void _toast(BuildContext context, String message) {
+  Future<void> _toggleRecording(
+    BuildContext context,
+    SessionRecorder recorder,
+  ) async {
+    if (recorder.isRecording) {
+      await recorder.stopRecording();
+    } else {
+      recorder.startRecording();
+    }
+  }
+
+  Future<void> _export(BuildContext context, SessionRecorder recorder) async {
+    final path = await recorder.exportLatest();
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(
+          path == null
+              ? 'Nothing to export — record a session first'
+              : 'Exported to $path',
+        ),
+      ),
     );
   }
 }

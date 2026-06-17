@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../telemetor_ui/telemetor_ui.dart';
 import '../data/dashboard_controller.dart';
 
 /// Multi-select of discovered channels; creates one (possibly multi-series)
@@ -26,19 +27,21 @@ class _AddChartDialogState extends State<AddChartDialog> {
   @override
   Widget build(BuildContext context) {
     final channels = widget.controller.availableChannels;
-    return AlertDialog(
-      title: const Text('Add chart'),
+    final text = context.tdlText;
+
+    return TDLDialog(
+      title: 'Add Chart',
       content: SizedBox(
         width: 320,
         child: channels.isEmpty
-            ? const Text('No channels discovered yet.')
+            ? Text('No channels discovered yet.', style: text.tableCell)
             : ListView(
                 shrinkWrap: true,
                 children: [
                   for (final name in channels)
                     CheckboxListTile(
                       dense: true,
-                      title: Text(name),
+                      title: Text(name, style: text.tableCell),
                       value: _selected.contains(name),
                       onChanged: (checked) => setState(() {
                         checked == true
@@ -50,9 +53,9 @@ class _AddChartDialogState extends State<AddChartDialog> {
               ),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text('CANCEL'),
         ),
         FilledButton(
           onPressed: _selected.isEmpty
@@ -61,7 +64,7 @@ class _AddChartDialogState extends State<AddChartDialog> {
                   widget.controller.addTile(_selected.toList());
                   Navigator.of(context).pop();
                 },
-          child: const Text('Add'),
+          child: const Text('ADD'),
         ),
       ],
     );

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'src/data/dashboard_controller.dart';
 import 'src/data/notification_feed.dart';
+import 'src/data/session_recorder.dart';
 import 'src/data/session_tracker.dart';
 import 'src/data/stream_stats.dart';
 import 'src/data/telemetry_hub.dart';
@@ -42,6 +43,10 @@ class _TelemetorAppState extends State<TelemetorApp> {
   late final SessionTracker _session = SessionTracker(widget.transport);
   late final NotificationFeed _notifications =
       NotificationFeed(widget.transport);
+  late final SessionRecorder _recorder = SessionRecorder(
+    widget.hub,
+    notifications: _notifications,
+  );
 
   @override
   void dispose() {
@@ -50,6 +55,7 @@ class _TelemetorAppState extends State<TelemetorApp> {
     _stats.dispose();
     _session.dispose();
     _notifications.dispose();
+    _recorder.dispose();
     super.dispose();
   }
 
@@ -62,6 +68,7 @@ class _TelemetorAppState extends State<TelemetorApp> {
         Provider<StreamStats>.value(value: _stats),
         Provider<SessionTracker>.value(value: _session),
         ChangeNotifierProvider<NotificationFeed>.value(value: _notifications),
+        ChangeNotifierProvider<SessionRecorder>.value(value: _recorder),
         ChangeNotifierProvider<DashboardController>.value(value: _dashboard),
       ],
       child: ValueListenableBuilder<ThemeMode>(

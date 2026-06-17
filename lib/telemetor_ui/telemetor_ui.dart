@@ -3,7 +3,10 @@
 /// Import this single library to access tokens, themes, and context helpers.
 library telemetor_ui;
 
+export 'charts/tdl_chart_legend.dart';
+export 'charts/tdl_chart_style.dart';
 export 'components/tdl_connection_indicator.dart';
+export 'components/tdl_dialog.dart';
 export 'components/tdl_live_badge.dart';
 export 'components/tdl_nav_item.dart';
 export 'components/tdl_page_header.dart';
@@ -13,6 +16,7 @@ export 'layouts/mission_control_layout.dart';
 export 'layouts/panel_column.dart';
 export 'layouts/panel_row.dart';
 export 'layouts/status_strip.dart';
+export 'layouts/telemetry_grid.dart';
 export 'layouts/tdl_layout.dart';
 export 'telemetry_widgets/telemetry_channel_list.dart';
 export 'telemetry_widgets/telemetry_device_card.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../telemetor_ui/telemetor_ui.dart';
 import '../network/telemetry_transport.dart';
 
 /// Lets the user change the server host/port at runtime.
@@ -50,8 +51,8 @@ class _ConnectionSettingsDialogState extends State<ConnectionSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Connection settings'),
+    return TDLDialog(
+      title: 'Connection Settings',
       content: Form(
         key: _formKey,
         child: Column(
@@ -63,6 +64,7 @@ class _ConnectionSettingsDialogState extends State<ConnectionSettingsDialog> {
               validator: (value) =>
                   (value == null || value.trim().isEmpty) ? 'Required' : null,
             ),
+            TDLSpacing.h(TDLSpacing.md),
             TextFormField(
               controller: _portController,
               decoration: const InputDecoration(labelText: 'Port'),
@@ -79,11 +81,14 @@ class _ConnectionSettingsDialogState extends State<ConnectionSettingsDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text('CANCEL'),
         ),
-        FilledButton(onPressed: _apply, child: const Text('Apply')),
+        FilledButton(
+          onPressed: _apply,
+          child: const Text('APPLY'),
+        ),
       ],
     );
   }

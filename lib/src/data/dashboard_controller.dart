@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'telemetry_hub.dart';
 
-enum DashboardLayout { single, dual, grid }
+enum DashboardLayout { single, dual, grid, telemetry }
 
 /// Configuration of one chart tile on the dashboard.
 @immutable
@@ -27,7 +27,7 @@ class DashboardController extends ChangeNotifier {
   final TelemetryHub hub;
 
   final List<ChartTileConfig> _tiles = [];
-  DashboardLayout _layout = DashboardLayout.grid;
+  DashboardLayout _layout = DashboardLayout.telemetry;
   int? _fullscreenTileId;
   int _nextTileId = 0;
   bool _seeded = false;
@@ -58,10 +58,9 @@ class DashboardController extends ChangeNotifier {
     _tiles.removeWhere(
         (tile) => tile.channelNames.any((name) => !available.contains(name)));
 
-    // Seed one tile per channel on first discovery so the dashboard is
-    // immediately useful; afterwards the tile set is the user's.
+    // Seed up to four chart tiles on first discovery (2×2 telemetry wall).
     if (!_seeded && _tiles.isEmpty) {
-      for (final name in availableChannels) {
+      for (final name in availableChannels.take(4)) {
         _tiles.add(ChartTileConfig(id: _nextTileId++, channelNames: [name]));
       }
       _seeded = true;

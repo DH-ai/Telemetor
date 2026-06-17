@@ -136,6 +136,7 @@ class _TileGrid extends StatelessWidget {
     }
 
     final gridDelegate = switch (controller.layout) {
+      DashboardLayout.telemetry => null,
       DashboardLayout.single =>
         const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 1,
@@ -157,14 +158,47 @@ class _TileGrid extends StatelessWidget {
         ),
     };
 
+    if (controller.layout == DashboardLayout.telemetry) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: TelemetryGrid(
+              itemCount: tiles.length,
+              itemBuilder: (context, index) => _ChartTile(
+                key: ValueKey(tiles[index].id),
+                controller: controller,
+                tile: tiles[index],
+              ),
+            ),
+          ),
+          if (tiles.length > 4)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TDLSpacing.lg,
+                0,
+                TDLSpacing.lg,
+                TDLSpacing.sm,
+              ),
+              child: Text(
+                '+ ${tiles.length - 4} more charts — switch to Grid layout to see all',
+                style: context.tdlText.caption,
+              ),
+            ),
+        ],
+      );
+    }
+
     return GridView.builder(
       padding: TDLSpacing.panel,
-      gridDelegate: gridDelegate,
+      gridDelegate: gridDelegate!,
       itemCount: tiles.length,
-      itemBuilder: (context, index) => _ChartTile(
-        key: ValueKey(tiles[index].id),
-        controller: controller,
-        tile: tiles[index],
+      itemBuilder: (context, index) => SizedBox.expand(
+        child: _ChartTile(
+          key: ValueKey(tiles[index].id),
+          controller: controller,
+          tile: tiles[index],
+        ),
       ),
     );
   }
@@ -194,51 +228,55 @@ class _ChartTile extends StatelessWidget {
     ];
     final unit = channels.length == 1 ? channels.first.unit : '';
 
-    return TDLPanel(
-      padding: EdgeInsets.zero,
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border(bottom: TDLBorders.divider(colors)),
-            ),
-            padding: TDLSpacing.panelHeader,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    tile.title.toUpperCase(),
-                    style:
-                        text.sectionTitle.copyWith(color: colors.textPrimary),
-                    overflow: TextOverflow.ellipsis,
+    return SizedBox.expand(
+      child: TDLPanel(
+        padding: EdgeInsets.zero,
+        expandChild: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border(bottom: TDLBorders.divider(colors)),
+              ),
+              padding: TDLSpacing.panelHeader,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      tile.title.toUpperCase(),
+                      style: text.sectionTitle
+                          .copyWith(color: colors.textPrimary),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                TDLHeaderIconButton(
-                  icon: fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                  tooltip: fullscreen ? 'Exit fullscreen' : 'Fullscreen',
-                  onPressed: () => fullscreen
-                      ? controller.exitFullscreen()
-                      : controller.enterFullscreen(tile.id),
-                ),
-                TDLHeaderIconButton(
-                  icon: Icons.close,
-                  tooltip: 'Remove chart',
-                  onPressed: () => controller.removeTile(tile.id),
-                ),
-              ],
+                  TDLHeaderIconButton(
+                    icon:
+                        fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                    tooltip: fullscreen ? 'Exit fullscreen' : 'Fullscreen',
+                    onPressed: () => fullscreen
+                        ? controller.exitFullscreen()
+                        : controller.enterFullscreen(tile.id),
+                  ),
+                  TDLHeaderIconButton(
+                    icon: Icons.close,
+                    tooltip: 'Remove chart',
+                    onPressed: () => controller.removeTile(tile.id),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: TelemetryChart(
-              hub: hub,
-              channels: channels,
-              title: '',
-              unit: unit,
-              showLegend: channels.length > 1,
-              palette: colors.chartSeries,
+            Expanded(
+              child: TelemetryChart(
+                hub: hub,
+                channels: channels,
+                title: '',
+                unit: unit,
+                showLegend: channels.length > 1,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

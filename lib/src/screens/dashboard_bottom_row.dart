@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../telemetor_ui/telemetor_ui.dart';
 import '../data/notification_feed.dart';
+import '../data/session_recorder.dart';
 import '../data/stream_stats.dart';
 import '../data/telemetry_hub.dart';
 import '../models/telemetry_channel.dart';
@@ -54,8 +55,19 @@ class _SessionsPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Placeholder until session recording lands.
-    return const TelemetrySessionTable(sessions: [], expand: true);
+    final recorder = context.watch<SessionRecorder>();
+
+    return TelemetrySessionTable(
+      expand: true,
+      sessions: [
+        for (final session in recorder.sessions.take(3))
+          TelemetrySessionEntry(
+            name: session.name,
+            date: session.formattedDate,
+            size: session.formattedSize,
+          ),
+      ],
+    );
   }
 }
 

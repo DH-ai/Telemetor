@@ -238,6 +238,8 @@ class _LayoutMenu extends StatelessWidget {
             value: DashboardLayout.single, child: Text('Single column')),
         PopupMenuItem(
             value: DashboardLayout.dual, child: Text('Two columns')),
+        PopupMenuItem(
+            value: DashboardLayout.telemetry, child: Text('Telemetry wall')),
         PopupMenuItem(value: DashboardLayout.grid, child: Text('Grid')),
       ],
     );
