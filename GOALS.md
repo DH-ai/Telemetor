@@ -109,3 +109,79 @@ Test gate: two servers streaming different schemas visualized at once.
 
 Serial/USB/radio transports, anomaly detection, flight prediction, recording database,
 multi-user monitoring, cloud sync, ground-station modes.
+
+## Goal 6 — Core platform and execution engine
+
+Turn the backend into a layered execution system instead of a single parser loop.
+
+- **Architecture**: backend owns everything; Flutter remains a client.
+- **Execution Engine**: model each ingestion flow as a DAG from transport to output.
+- **Worker Pool**: producer → bounded queue → workers → aggregator → cache.
+- **Plugin API**: parsers, transforms, exporters, and future integrations load as plugins.
+- **Parser API**: bytes/text in, structured samples out, with clear validation and errors.
+- **Memory Manager**: zero-copy buffers, shared memory, and memory-mapped datasets where useful.
+- **Scheduling**: priority queues, backpressure, cancellation, retries, and explicit worker assignment.
+- **Performance**: target high-throughput streaming with batched work, low-copy data flow, and Rust-friendly hot paths.
+
+Test gate: run a live dataset through the layered pipeline, swap at least one parser via the plugin API, and verify the scheduler, memory path, and worker pool keep up under load.
+
+## Goal 7 — SQL, inspection, and dataset diff features
+
+Add features for investigating data instead of just plotting it.
+
+- **SQL**: query telemetry with expressions like `SELECT * WHERE velocity > 100`.
+- **Dataset diff**: compare two runs or two samplesets like `git diff`.
+- **Custom scripts**: run user-authored checks through the API to inspect irregularities.
+- **Data testing**: execute assertions and validation scripts against recorded or live data.
+- **Visualization**: turn query results, diffs, anomalies, and test output into charts and summaries.
+
+Test gate: load a dataset, run a SQL filter, diff two captures, execute a custom inspection script, and visualize the result without writing ad hoc backend code.
+
+## Goal 8 — Documentation and domain packs
+
+Make the system usable for specific audiences, not just generic telemetry.
+
+- **Documentation**: create a `/docs` surface for architecture, APIs, examples, and workflows.
+- **ML engineers**: loss, accuracy, learning rate, GPU memory, token/sec, latency, embeddings, and confusion matrices.
+- **Manufacturing engineers**: PLC logs, sensors, failures, maintenance, PID tuning, sensor fusion, and velocity profiles.
+- **Templates**: ship ready-made goal-specific dashboards and sample configs for those workflows.
+- **Examples**: show how to compare runs, inspect divergence, and investigate failures with the same core tooling.
+
+Test gate: open `/docs`, load an ML template, load a manufacturing template, and verify both can inspect, compare, and visualize their datasets with the shared backend.
+
+## Features
+
+These are cross-cutting capabilities to fold into the goal work above.
+
+### Large data and execution
+
+- Open 50 GB CSVs without loading everything into RAM.
+- Columnar lazy execution.
+- Arrow/Polars backend.
+- SIMD parsing.
+- Parallel file loading.
+- Memory-mapped files.
+- GPU acceleration where appropriate.
+
+### Querying and inspection
+
+- SQL over CSV.
+- Interactive filtering.
+- Streaming plots.
+- Time-series support.
+- Profiling and statistics.
+- Git diff for datasets.
+
+### Extensibility and intelligence
+
+- Custom plugin system.
+- AI-powered querying, including prompts like "show me anomalies".
+
+### Inspiration
+
+- PyTorch: DataLoader, worker pools, dataset abstractions, prefetch, pinned memory, lazy loading.
+- Ray: task scheduling, futures, distributed workers, actor model.
+- Apache Arrow: columnar memory, zero-copy, IPC, SIMD.
+- DuckDB: vectorized execution, lazy query planning, chunk processing.
+- Polars: lazy execution, query optimization, streaming.
+

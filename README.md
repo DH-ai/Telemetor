@@ -7,6 +7,306 @@ The dashboard auto-discovers channels from the stream's header packet, charts
 them live (sliding window, LTTB decimation, ≤30 fps repaints), and lets you
 add/remove/fullscreen chart tiles at runtime. Material 3 light/dark theme.
 
+## Overall architecture
+
+```mermaid
+flowchart TD
+
+    CLI["CLI"]
+    Workspace["Workspace Manager"]
+
+    CLI --> Workspace
+
+    Config["Config Manager"]
+    Plugins["Plugin Manager"]
+    Sessions["Session Manager"]
+
+    Workspace --> Config
+    Workspace --> Plugins
+    Workspace --> Sessions
+
+    Scheduler["Execution Scheduler"]
+
+    Config --> Scheduler
+    Plugins --> Scheduler
+    Sessions --> Scheduler
+
+    subgraph Transport["Transport Layer"]
+        TCP["TCP"]
+        WebSocket["WebSocket"]
+        Serial["Serial"]
+        File["File"]
+    end
+
+    Scheduler --> Transport
+
+    Parser["Parser Engine"]
+    Transform["Transform Pipeline"]
+    Features["Feature Pipeline"]
+    AI["AI Pipeline"]
+    Export["Export Engine"]
+
+    Transport --> Parser
+    Parser --> Transform
+    Transform --> Features
+    Features --> AI
+    AI --> Export
+
+    Workers["Worker Pool"]
+
+    Scheduler --> Workers
+
+    Workers --> Parser
+    Workers --> Transform
+    Workers --> Features
+    Workers --> AI
+
+    Memory["Zero-Copy Shared Memory"]
+
+    Parser --> Memory
+    Transform --> Memory
+    Features --> Memory
+    AI --> Memory
+    Export --> Memory
+
+    subgraph Storage["Storage Layer"]
+        Parquet["Parquet"]
+        JSONL["JSONL"]
+        DuckDB["DuckDB"]
+    end
+
+    Memory --> Storage
+
+    UI["Flutter Desktop"]
+
+    Memory --> UI
+    Storage --> UI
+```
+
+
+This is the bird's-eye orchestration view. The backend coordinates the core
+pipeline, and Flutter sits at the edge as the visualization client.
+
+## Architecture direction
+
+Telemetor is being shaped as a backend-owned system. Flutter is the client layer;
+the backend owns transport, parsing, execution, storage, and orchestration.
+
+### Layer 1
+
+Transport
+
+```text
+TCP
+
+UDP
+
+Serial
+
+USB
+
+WebSocket
+
+Files
+
+Memory Mapping
+```
+
+You learn networking.
+
+### Layer 2
+
+Parser Engine
+
+Every parser becomes a plugin.
+
+```text
+CSV
+
+JSON
+
+CAN Bus
+
+Telemetry
+
+ROS
+
+MAVLink
+
+Custom Binary
+```
+
+Now you have plugin architecture.
+
+### Layer 3
+
+Execution Engine
+
+This is where most of the system intelligence lives.
+
+```text
+Node Graph
+
+↓
+
+Scheduler
+
+↓
+
+Dependency Resolver
+
+↓
+
+Worker Pool
+
+↓
+
+Execution
+```
+
+Every parser becomes a DAG.
+
+Exactly like Airflow, Ray, Dask, and PyTorch.
+
+### Layer 4
+
+Worker Pool
+
+This is where Rust becomes useful.
+
+Instead of:
+
+```text
+for row in csv:
+```
+
+Create:
+
+```text
+Producer
+
+↓
+
+Bounded Queue
+
+↓
+
+N Workers
+
+↓
+
+Aggregator
+
+↓
+
+Cache
+
+↓
+
+UI
+```
+
+Now you are learning concurrency.
+
+### Layer 5
+
+Memory
+
+Do not pass copies.
+
+Study Apache Arrow, Polars, PyTorch storage, shared memory, zero-copy,
+memory mapping, and SIMD parsing.
+
+This alone teaches computer architecture.
+
+### Layer 6
+
+Scheduling
+
+Instead of:
+
+```text
+parse
+plot
+done
+```
+
+Create:
+
+```text
+Scheduler
+
+↓
+
+Priority Queue
+
+↓
+
+Ready Queue
+
+↓
+
+Worker Assignment
+
+↓
+
+Backpressure
+
+↓
+
+Cancellation
+
+↓
+
+Retries
+```
+
+Now you are literally implementing OS concepts.
+
+### Layer 7
+
+Storage
+
+Instead of:
+
+```text
+JSONL
+```
+
+Think:
+
+```text
+Storage Interface
+
+↓
+
+DuckDB
+
+↓
+
+Parquet
+
+↓
+
+CSV
+
+↓
+
+SQLite
+```
+
+Plugin again.
+
+### Layer 8
+
+Visualization
+
+Flutter becomes a client.
+
+Nothing more.
+
+Backend owns everything.
+
 ## Requirements
 
 - Flutter (stable channel) with Linux desktop support
